@@ -6,13 +6,20 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import android.Manifest;
+import android.widget.Toolbar;
 
 
 //import com.example.dougjudice.uncharted.R;
@@ -67,6 +74,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     boolean mRequestingLocationUpdates = true;
 
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+    private CharSequence mTitle;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private String[] mSettings;
 
     // probably will need to be fixed later on ?
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults){
@@ -84,7 +96,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        /*
+        mTitle = "Test";
+        mSettings = new String[]{"Profile","History","Friends"};
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+    */
 
         timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
 
@@ -99,7 +116,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // HANDLES LOCATION AUTO-UPDATE LOGIC
     private class MyTimerTask extends TimerTask implements Runnable {
-
         @Override
         public void run(){
             runOnUiThread(new Runnable() {
@@ -110,12 +126,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
         }
     }
-
-    private Handler timerHandler = new Handler(){
-        public void cycle(){
-
-        }
-    };
 
     protected void onStart(){
         mGoogleApiClient.connect();
@@ -182,7 +192,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 pg.setFillColor(Color.YELLOW);
                 clickedNode.setPolygon(pg);
                 forceLocationUpdate();
-                Toast t = Toast.makeText(context, "Opening Olive Branch Location...", Toast.LENGTH_SHORT );
+                Toast t = Toast.makeText(context, "Opening " + clickedNode.getName() + " node...", Toast.LENGTH_SHORT );
                 t.show();
             }
         });
@@ -197,13 +207,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 16.5f));
     }
 
-    // *****                                            *****
-    // **                                                  **
-    // *                                                    *
-    // GOOGLE PLAY SERVICES LOCATION INFORMATION & METHODS  *
-    // *                                                    *
-    // **                                                  **
-    // *****                                            *****
+    // *****                                             *****
+    // **                                                   **
+    // *                                                     *
+    // * GOOGLE PLAY SERVICES LOCATION INFORMATION & METHODS *
+    // *                                                     *
+    // **                                                   **
+    // *****                                             *****
 
     // Initializes automatic location services
     protected void startLocationUpdates(){
@@ -226,7 +236,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             System.out.println("Permission Granted Immediately");
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             mLastUpdateTime = DateFormat.getDateTimeInstance().format(new Date());
-            updateUI();
+
+
+            // Use this to check if User is within a polygon. checkAllIntersections returns a String which can act as a key to get the appropriate NodePolygon
+            if(pairNodeMap != null) {
+                System.out.println("Checking system");
+                String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
+                if (state != null)
+                    System.out.println("User is currently within: " + state);
+                else { // not in any polygon
+                    System.out.println("User not in any polygon");
+                }
+            }
+
+
+            updateUI(); // Used to set the map view if needed
         }
     }
 
@@ -259,6 +283,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
     }
+
+
 
 
 

@@ -2,6 +2,7 @@ package com.example.dougjudice.uncharted;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -19,9 +20,11 @@ import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -30,96 +33,32 @@ import java.util.Map;
 
 public final class Utility {
 
-    // Draws the necessary polygons over all significant New Brunswick Landmarks
-    public static void drawPolys(GoogleMap map){
+    public static void printCoordinates(ArrayList<ArrayList<Double>> arr){
 
-        // Add Polygon over Olive Branch
-        PolygonOptions oliveBranch = new PolygonOptions()
-                .add(new LatLng(40.501306,-74.452853)) // SW corner
-                .add(new LatLng(40.501510,-74.453080)) // NW corner
-                .add(new LatLng(40.501574,-74.452974))
-                .add(new LatLng(40.501362,-74.452758))
-                .add(new LatLng(40.501306,-74.452853)) // closes polygon
-                .fillColor(Color.BLUE);  // Set color
-
-        PolygonOptions oldeQueens = new PolygonOptions()
-                .add(new LatLng(40.498995,-74.451999)) // NW corner
-                .add(new LatLng(40.498842,-74.452105)) // SW corner
-                .add(new LatLng(40.498807,-74.4520164))
-                .add(new LatLng(40.498956,-74.451913))
-                .add(new LatLng(40.498995,-74.451999)) // closes polygon
-                .fillColor(Color.BLUE);  // Set color
-
-        PolygonOptions hanselGriddle = new PolygonOptions()
-                .add(new LatLng(40.499265,-74.452806)) // NW corner
-                .add(new LatLng(40.499061,-74.452940)) // SW corner
-                .add(new LatLng(40.498984,-74.452735))
-                .add(new LatLng(40.499187,-74.452605))
-                .add(new LatLng(40.499265,-74.452806)) // closes polygon
-                .fillColor(Color.BLUE);  // Set color
-
-        map.addPolygon(oliveBranch);
-        map.addPolygon(oldeQueens);
-        map.addPolygon(hanselGriddle);
-
+        for(int i = 0; i < arr.size(); i++){
+            ArrayList<Double> pair = arr.get(i);
+            System.out.println(" Coordinate "+ i +" : ");
+            System.out.println("X: " + pair.get(0)+ " | Y: " + pair.get(1));
+        }
         return;
     }
 
-    // Based on Ray-Casting Algorithm : http://rosettacode.org/wiki/Ray-casting_algorithm
+    // Uses PolyUtil to compute
     public static boolean pointInPolygon(ArrayList<Double> point, GamePolygon poly){
-        int crossings = 0;
-        ArrayList<ArrayList<Double>> coor = poly.getCoordinates();
-        coor.remove(4); // remove final index which closes the loop
 
-        //for each edge
-        for(int i = 0; i < coor.size(); i++){
-            ArrayList<Double> p1 = coor.get(i);
-            int j = i + 1;
-
-            // to close last edge, take first point of polygon
-            if(j > coor.size()) {
-                j = 0;
-            }
-
-            ArrayList<Double> p2 = coor.get(j);
-            if(rayCrossesSegment(point, p1, p2)){
-                crossings++;
-            }
-
+        LatLng userLoc = new LatLng(point.get(0),point.get(1));
+        ArrayList<LatLng> coList = new ArrayList<>();
+        for(int i = 0; i < poly.getCoordinates().size()-1; i++){
+            ArrayList<Double> pair = poly.getCoordinates().get(i);
+            coList.add(new LatLng(pair.get(0), pair.get(1)));
         }
 
-        // odd number of crossings?
-        return (crossings % 2 == 1);
+        boolean contain = PolyUtil.containsLocation(userLoc, coList, true );
 
-    }
-    public static boolean rayCrossesSegment(ArrayList<Double> point, ArrayList<Double> a, ArrayList<Double> b){
-        double px = point.get(0), py = point.get(1), ax = a.get(0), ay = a.get(1), bx = b.get(0), by = b.get(1);
+        System.out.println(contain + " result from PolyUtil func");
 
-        if(ay > by){
-            ax = b.get(1);
-            ay = b.get(0);
-            bx = a.get(1);
-            by = a.get(0);
-        }
+        return contain;
 
-        // alter longitude to cater for 180 degree crossings
-        if (px < 0 || ax < 0 || bx < 0) { px += 360; ax += 360; bx += 360; }
-        // if point has same lat as a or b, increase slightly py
-        if (py == ay || py == by) py += 0.00000001;
-
-        // if point above , below, or to right of seg, return false
-        if((py > by || py < ay) || (px > Math.max(ax, bx))){
-            return false;
-        }
-        else if (px < Math.min(ax,bx)){
-            return true;
-        }
-        // else if two conditions not met, compare slope of segment [a,b], (red) and segment [a,p] (blue) , see if point is to the left of [a,b] or not
-        else{
-            double red = (ax!=bx) ? ((by - ay) / (bx - ax)) : Double.POSITIVE_INFINITY;
-            double blue = (ax!=px) ? ((by - ay) / (px - ax)) : Double.POSITIVE_INFINITY;
-            return (blue >= red);
-        }
     }
 
     // Reverse hashmap lookup: Find Key from Value
@@ -127,7 +66,7 @@ public final class Utility {
         for(Map.Entry<Object,Object> e : map.entrySet()){
             Object key = e.getKey();
             Object value = e.getValue();
-            if(value.equals(o) == true){
+            if(value.equals(o)){
                 return key;
             }
             else {
@@ -137,5 +76,32 @@ public final class Utility {
         return null; // Key not found
     }
 
+    // Takes Hashmap of Name:Node pairings and sees if location argument is in any single node
+    public static String checkAllIntersections(HashMap<String,NodePolygon> map, Location loc){
+
+        //Iterator it = map.entrySet().iterator();
+        for(Map.Entry<String,NodePolygon> entry: map.entrySet()){
+
+            if(entry == null)
+                break;
+
+            System.out.println(entry.getKey());
+
+            ArrayList<Double> arrCor = new ArrayList<>();
+
+            double lat = loc.getLatitude();
+            double longi = loc.getLongitude();
+
+            arrCor.add(lat);
+            arrCor.add(longi);
+
+            if(pointInPolygon(arrCor, (GamePolygon) entry.getValue())){
+                System.out.println("Polygon: " + entry.getValue().getName());
+                return (String) entry.getKey();
+            }
+
+        }
+        return null; // not in any polygon
+    }
 
 }
