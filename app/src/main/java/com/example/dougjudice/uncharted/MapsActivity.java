@@ -15,6 +15,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -96,12 +97,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        /*
+
         mTitle = "Test";
         mSettings = new String[]{"Profile","History","Friends"};
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-    */
+
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.nav_header_drawer, mSettings));
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
 
