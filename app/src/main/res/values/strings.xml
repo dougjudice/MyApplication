@@ -7,4 +7,16 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="ak_login_protocol_scheme">ak609755152555265</string>
+    <string name="FACEBOOK_APP_ID">609755152555265</string>
+    <string name="ACCOUNT_KIT_CLIENT_TOKEN">759c0c49d36a2ce13f664f6e3819f73c</string>
+
+    <string name="title_activity_main">MainActivity</string>
+    <string name="email_login">Continue with email</string>
+    <string name="sms_login">Continue with text message</string>
+    <string name="login_error">Login Error</string>
+
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
