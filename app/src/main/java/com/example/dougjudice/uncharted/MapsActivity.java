@@ -15,8 +15,9 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -27,7 +28,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import android.Manifest;
-import android.widget.Toolbar;
+import android.support.v7.widget.Toolbar;
 
 
 
@@ -62,7 +63,7 @@ import java.util.TimerTask;
 
 
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     // For testing purposes only:
     ArrayList<String> polyFields = new ArrayList<>();
@@ -89,6 +90,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private CharSequence mTitle;
+    private CharSequence mDrawerTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mSettings;
 
@@ -109,36 +111,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // Set up Drawer
         mTitle = "Test";
+        mDrawerTitle = "Test 2";
         mSettings = new String[]{"Profile","History","Friends"};
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mSettings));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        Toolbar toolbar = new Toolbar(getApplicationContext());
+        // Set up ActionBar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_drawer);
 
-
-
+        // Put the above two together and make them animated/function properly
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,
                 mDrawerLayout,
-                R.drawable.ic_drawer,
+                toolbar,
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close
         ) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
+                getActionBar().setTitle(mTitle);
             }
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                getActionBar().setTitle(mDrawerTitle);
             }
         };
 
-        //getFragr().setDisplayHomeAsUpEnabled(true);
-        ///getActionBar().setHomeButtonEnabled(true);
+        // Set up ActionBar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
+        // Start the constant tick by creating new Timer Thread (Native Android OS call)
         timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -148,7 +157,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
     }
 
-    // HANDLES LOCATION AUTO-UPDATE LOGIC
+    // HANDLES LOCATION AUTO-UPDATE LOGIC W/ THREAD
     private class MyTimerTask extends TimerTask implements Runnable {
         @Override
         public void run(){
@@ -160,6 +169,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
         }
     }
+
+    // Creates the actionbar menu and 'inflates' it
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu){
+        getMenuInflater().inflate(R.menu.tool_menu, menu);
+        return true;
+    }
+
+    /**
+    *
+    *   LIFECYCLE FUNCTIONS
+    *
+     */
 
     protected void onStart(){
         mGoogleApiClient.connect();
@@ -188,6 +210,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         updateUI();
 
     }
+
 
     /**
      * Manipulates the map once available.
@@ -258,6 +281,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         double longi = mLastLocation.getLongitude();
         LatLng currLoc = new LatLng(lat,longi);
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 16.5f));
+    }
+
+    public void updateUIHard(){
+        System.out.println("Correcting location... ");
+        double lat = mLastLocation.getLatitude();
+        double longi = mLastLocation.getLongitude();
+        LatLng currLoc = new LatLng(lat,longi);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 16.5f));
     }
 
     // *****                                             *****
@@ -337,11 +368,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
     }
 
-
-
-
-
-
     // These don't need to be implemented but need to stay for the sake of the referenced interfaces
     @Override
     public void onConnectionSuspended(int i ) {
@@ -356,26 +382,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //t.show();
         System.out.println("onConnectionFailed triggered");
     }
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu){
         // if nav drawer open, hide action items related to content view
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+        //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
         return super.onPrepareOptionsMenu(menu);
     }
 
+    // Process clcked options from menu (three vertical dot) tab on right of ActionBar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
         // true, then it has handled the app icon touch event
+
         if (mDrawerToggle.onOptionsItemSelected(item)) {
+            System.out.println("Ret True");
             return true;
         }
+        if(item.getItemId() == R.id.my_location){
+            updateUIHard(); // forces camera to user location
+            System.out.println("Clicked Bookmark Menu");
+        }
+
         // Handle your other action bar items...
 
         return super.onOptionsItemSelected(item);
     }
 
+    // Listens for clicks in the Drawer pulled from the left of the main activity
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -383,8 +417,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    // Processes clicks in the Drawer
     private void selectItem(int position){
+        System.out.println("Position: " + position);
         mDrawerList.setItemChecked(position, true);
+
+        // Intent intent = new Intent(this, X.class);
+        // Position is in the mSettings array object, position # corresponds to array spot
+
+        switch(position){
+            case 0:
+                // Profile
+                break;
+            case 1:
+                // History
+                break;
+            case 2:
+                // Friends
+                break;
+            default:
+                System.out.println("Error");
+        }
+
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
@@ -399,6 +453,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
+
 
 }
 

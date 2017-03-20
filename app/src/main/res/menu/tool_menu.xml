@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/my_location"
+        android:title="Go to my Location"/>
+    <item android:id="@+id/group_location"
+        android:title="Go to my Group Location"/>
+</menu>
