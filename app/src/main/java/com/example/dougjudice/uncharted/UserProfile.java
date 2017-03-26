@@ -14,6 +14,7 @@ public class UserProfile {
     int groupID;
     String groupName;
 
+
     // FROM FACEBOOK API
     String userName;
     ArrayList<UserProfile> friendList = new ArrayList<>();

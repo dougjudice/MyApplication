@@ -89,6 +89,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     boolean mRequestingLocationUpdates = true;
     boolean firstStart = true;
+    boolean locationSet = false;
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -171,7 +172,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Creates a new thread that's on a timer set to 2-second quanta
     private class MyTimerTask extends TimerTask implements Runnable {
         @Override
-        //TODO: live past pause?
         public void run(){
             runOnUiThread(new Runnable() {
                 @Override
@@ -196,32 +196,39 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      ***/
 
     protected void onStart(){
+        System.out.println("STARTING");
+
+        // needed to enable Location Services
         mGoogleApiClient.connect();
         super.onStart();
     }
     protected void onStop(){
-        mGoogleApiClient.disconnect();
+        System.out.println("STOPPING");
+
         super.onStop();
     }
     @Override
     public void onPause(){
         System.out.println("PAUSING");
         super.onPause();
-        timer.cancel();
-        timer.purge();
     }
     @Override
     public void onResume(){
 
         super.onResume();
-
-        // Timer already started initially in onCreate. May eventually delete that and just leave it up to onResume ... TODO : look into
-        if(firstStart)
+        if(firstStart) {
             return;
-
+        }
         System.out.println("RESUMING");
         timer.schedule(new MyTimerTask(), 1000, 2000);
         updateUI();
+    }
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        mGoogleApiClient.disconnect();
+        timer.purge();
+        timer.cancel();
     }
 
 
@@ -245,8 +252,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Add a marker in NB and move the camera
         LatLng NewBrunswick = new LatLng(40.5031574, -74.451819);
-        mMap.addMarker(new MarkerOptions().position(NewBrunswick).title("Marker in New Brunswick"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f)); // max zoom is 21.0f
+        //mMap.addMarker(new MarkerOptions().position(NewBrunswick).title("Marker in New Brunswick"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f)); // max zoom is 21.0f
 
         // Establish Permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
@@ -263,6 +270,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             pairPolyMap.put(np.getPolygon(),np.getName());
             pairNodeMap.put(np.getName(),np);
         }
+        //updateUIHard();
 
         System.out.println("Mapping...");
 
@@ -337,7 +345,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 System.out.println("ERROR: NO USER LOCATION");
                 return;
             }
+            //locationSet = true;
             if(pairNodeMap != null) {
+                if(locationSet == false){
+                    updateUIHard();
+                    locationSet = true;
+                }
                 System.out.println("Checking system");
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
 

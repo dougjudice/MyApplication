@@ -35,18 +35,6 @@ public class GeoJsonUtil {
 
     private static int p_count = 0;
 
-    /*
-    public static void bootJSON(Context context){
-        ArrayList<String> polyFields = new ArrayList<>();
-
-        polyFields.add("hanselgriddle");
-        polyFields.add("olivebranch");
-        polyFields.add("oldequeens");
-
-        l
-    }
-    */
-
     // For testing purposes only, won't be needed in final context
     public static JSONObject bootJSON(Context context, String file){
 

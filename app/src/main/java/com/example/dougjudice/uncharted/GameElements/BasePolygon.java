@@ -24,4 +24,6 @@ public class BasePolygon extends GamePolygon {
         //this.miningUsers = new ArrayList<User>();
     }
 
+
+
 }

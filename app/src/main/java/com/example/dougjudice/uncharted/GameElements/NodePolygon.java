@@ -2,6 +2,7 @@ package com.example.dougjudice.uncharted.GameElements;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.example.dougjudice.uncharted.ResourceType;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,7 @@ public class NodePolygon extends GamePolygon {
     }
 
     // Sets up necessary information to show node is ready to be mined
+    // Should be initiated by Server
     public void setResource(int num1){
         this.resourceCount = num1;
         this.remainingTicks = 1000; // 1000 * 2 second ticks = 2000 second uptime
@@ -55,4 +57,7 @@ public class NodePolygon extends GamePolygon {
         }
         return "EXCEPTION";
     }
+
+    public void postMiningStatusToServer(){}
+
 }
