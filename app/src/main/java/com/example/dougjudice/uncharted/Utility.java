@@ -105,9 +105,31 @@ public final class Utility {
         return null; // not in any polygon
     }
 
+    // Converst <double> to LatLng
     public static LatLng convertCoor(ArrayList<Double> cor){
-        //LatLng l = new LatLng
-        return null;
+        LatLng l = new LatLng(cor.get(0),cor.get(1));
+        return l;
+    }
+
+    // Get center of a polygon
+    public static LatLng centroid(ArrayList<ArrayList<Double>> points) {
+
+        double centroid[] = { 0.0, 0.0};
+
+        //LatLng centroid = null;
+
+        for (int i = 0; i < points.size(); i++) {
+            centroid[0] += points.get(i).get(0);
+            centroid[1] += points.get(i).get(1);
+        }
+
+        int totalPoints = points.size();
+        centroid[0] = centroid[0] / totalPoints;
+        centroid[1] = centroid[1] / totalPoints;
+
+        LatLng retVal = new LatLng(centroid[0],centroid[1]);
+
+        return retVal;
     }
 
 }

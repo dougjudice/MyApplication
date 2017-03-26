@@ -1,60 +1,35 @@
 package com.example.dougjudice.uncharted;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
+// Android Imports
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.Toast;
-
 import android.Manifest;
 import android.support.v7.widget.Toolbar;
 
-
-
-//import com.example.dougjudice.uncharted.R;
+// My Imports
 import com.example.dougjudice.uncharted.DataProcessing.*;
 import com.example.dougjudice.uncharted.GameElements.*;
 
+// Maps imports
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.drive.Drive;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -66,36 +41,23 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
 
+// JSON Imports
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+// Java Imports
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
-
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, NavigationView.OnNavigationItemSelectedListener {
 
-    // For testing purposes only:
+    // For testing purposes only TODO: Remove Later
     ArrayList<String> polyFields = new ArrayList<>();
-
 
     // Hashmap that maps every polygon's name to its respective polygon for a quick  reference and lookup
     private HashMap pairPolyMap = new HashMap<>();
@@ -109,7 +71,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int MY_LOCATION_REQUEST_CODE = 1;
     private GoogleMap mMap;
 
-    Location mLastLocation;  // Contains user last location, updated via listener or otherwise ... analogous to current location most of the time
+    Location mLastLocation;       // Contains user last location, updated via listener or otherwise ... analogous to current location most of the time
     String mLastUpdateTime;       // Contains last time of user location update
 
     boolean mRequestingLocationUpdates = true;
@@ -117,34 +79,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean locationSet = false;
 
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
     private CharSequence mTitle;
     private CharSequence mDrawerTitle;
     private ActionBarDrawerToggle mDrawerToggle;
-    private String[] mSettings;
-    NavigationView navView = null;
-
-    // probably will need to be fixed later on ?
-    public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults){
-        if(requestCode == MY_LOCATION_REQUEST_CODE){
-// TODO
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // Set up DrawerLayout (contains NavigationView)
+        // DrawerLayout Init
         mTitle = "Test";
         mDrawerTitle = "Test 2";
-        mSettings = new String[]{"Profile","History","Friends"};
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         // Sets up NavigationView (the actual drawer)
@@ -158,9 +109,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_drawer);
-
-
-
 
         // Put the above two together and make them animated/function properly
         mDrawerToggle = new ActionBarDrawerToggle(
@@ -187,9 +135,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Start the constant tick by creating new Timer Thread (Native Android OS call)
         timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
 
-        // Autocomplete Fragment
+        // Autocomplete Fragment (Goes inbetween Hamburger drawer icon & Toolbar Menu)
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
+        // Autocomplete Fragment options & listeners
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
 
             @Override
@@ -212,7 +161,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-
     }
 
     // Creates a new thread that's on a timer set to 2-second quanta
@@ -277,7 +225,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         timer.cancel();
     }
 
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -291,15 +238,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         final Context context = getApplicationContext();
         mMap = googleMap;
 
-        // for testing only
+        // for testing only TODO: Remove when JSON properly implemented to grab all polygons
         polyFields.add("hanselgriddle");
         polyFields.add("olivebranch");
         polyFields.add("oldequeens");
-
-        // Add a marker in NB and move the camera
-        LatLng NewBrunswick = new LatLng(40.5031574, -74.451819);
-        //mMap.addMarker(new MarkerOptions().position(NewBrunswick).title("Marker in New Brunswick"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f)); // max zoom is 21.0f
 
         // Establish Permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
@@ -308,6 +250,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_LOCATION_REQUEST_CODE);
         }
 
+        // Initialize all polygons
         for(int i = 0; i < polyFields.size(); i++) {
             JSONObject obj = GeoJsonUtil.bootJSON(getApplicationContext(), polyFields.get(i));
             NodePolygon np = GeoJsonUtil.generatePolygon(obj,mMap);
@@ -316,11 +259,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             pairPolyMap.put(np.getPolygon(),np.getName());
             pairNodeMap.put(np.getName(),np);
         }
-        //updateUIHard();
 
-        System.out.println("Mapping...");
-
-        // Used
+        // Whenever a polygon is clicked, gets that polygon and performs action on it
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
 
             public void onPolygonClick(Polygon pg){
@@ -334,8 +274,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 clickedNode.setPolygon(pg);
                 forceLocationUpdate(); // default timethread executed statement
 
-                //mMap.addMarker(new MarkerOptions()
-                //    .position(clickedNode.getCoordinates()))
+                // Fetches marker object with info contained in NodePolygon object
+                clickedNode.getMarker().showInfoWindow();
 
                 Toast t = Toast.makeText(context, "Opening " + clickedNode.getName() + " node...", Toast.LENGTH_SHORT );
                 t.show();
@@ -345,7 +285,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // Utility Function for updating Coordinates
     public void updateUI(){
-        System.out.println("Correcting location... ");
+        //System.out.println("Correcting location... ");
         double lat = mLastLocation.getLatitude();
         double longi = mLastLocation.getLongitude();
         LatLng currLoc = new LatLng(lat,longi);
@@ -353,7 +293,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     // Utility Function for updating Moving Camera (necessary sometimes)
     public void updateUIHard(){
-        System.out.println("Correcting location... ");
+        //System.out.println("Correcting location... ");
         double lat = mLastLocation.getLatitude();
         double longi = mLastLocation.getLongitude();
         LatLng currLoc = new LatLng(lat,longi);
@@ -401,14 +341,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     updateUIHard();
                     locationSet = true;
                 }
-                System.out.println("Checking system");
+                //System.out.println("Checking system");
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
 
                 if (state != null){ // User is in a polygon
                     System.out.println("User is currently within: " + state);
                     NodePolygon overlap = (NodePolygon) pairNodeMap.get(state);
                     overlap.depleteResourcesOnTick();
-                    System.out.println(" ### REMAINING RESOURCES IN " + state + " : " + overlap.getResourceCount());
+                    //System.out.println(" ### REMAINING RESOURCES IN " + state + " : " + overlap.getResourceCount());
                 }
                 else { // User not in any polygon
                     System.out.println("User not in any polygon");
@@ -434,6 +374,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    // Location changed listener( should fire on update tick normally, else in Emulator will fire when you change the location manually)
     @Override
     public void onLocationChanged(Location location){
         System.out.println("$ Location Changed $");
@@ -484,10 +425,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         // Handle your other action bar items...
-
         return super.onOptionsItemSelected(item);
     }
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
@@ -499,7 +438,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    // Map DrawerLayout options to actions
+    // Map DrawerLayout items/options to actions, Group Activity shown as an example
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
