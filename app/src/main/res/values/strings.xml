@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Uncharted</string>
-    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps">MapActivity</string>
     <string name="title_activity_drawer">DrawerActivity</string>
+    <string name="title_activity_group">GroupActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

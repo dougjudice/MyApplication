@@ -333,6 +333,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mLastUpdateTime = DateFormat.getDateTimeInstance().format(new Date());
 
             // Use this to check if User is within a polygon. checkAllIntersections returns a String which can act as a key to get the appropriate NodePolygon
+            if(mLastLocation == null){
+                System.out.println("ERROR: NO USER LOCATION");
+                return;
+            }
             if(pairNodeMap != null) {
                 System.out.println("Checking system");
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
@@ -469,8 +473,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
