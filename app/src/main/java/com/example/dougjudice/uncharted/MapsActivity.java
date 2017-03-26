@@ -320,6 +320,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         System.out.println("Mapping...");
 
+        // Used
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
 
             public void onPolygonClick(Polygon pg){
@@ -332,6 +333,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 System.out.println("Last Location: lat: " + mLastLocation.getLatitude() + " long : " + mLastLocation.getLongitude() +" timestamp: " + mLastUpdateTime);
                 clickedNode.setPolygon(pg);
                 forceLocationUpdate(); // default timethread executed statement
+
+                //mMap.addMarker(new MarkerOptions()
+                //    .position(clickedNode.getCoordinates()))
 
                 Toast t = Toast.makeText(context, "Opening " + clickedNode.getName() + " node...", Toast.LENGTH_SHORT );
                 t.show();

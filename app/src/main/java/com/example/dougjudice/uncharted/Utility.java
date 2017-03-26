@@ -105,4 +105,9 @@ public final class Utility {
         return null; // not in any polygon
     }
 
+    public static LatLng convertCoor(ArrayList<Double> cor){
+        //LatLng l = new LatLng
+        return null;
+    }
+
 }
