@@ -8,7 +8,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -20,14 +23,23 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import android.Manifest;
@@ -41,10 +53,14 @@ import com.example.dougjudice.uncharted.GameElements.*;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.drive.Drive;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -56,11 +72,20 @@ import com.google.android.gms.maps.model.PolygonOptions;
 
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -99,8 +124,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String[] mSettings;
     NavigationView navView = null;
 
-
-
     // probably will need to be fixed later on ?
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults){
         if(requestCode == MY_LOCATION_REQUEST_CODE){
@@ -136,6 +159,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_drawer);
 
+
+
+
         // Put the above two together and make them animated/function properly
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,
@@ -161,12 +187,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Start the constant tick by creating new Timer Thread (Native Android OS call)
         timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
 
+        // Autocomplete Fragment
+        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+
+            @Override
+            public void onPlaceSelected(Place place) {
+                // Perform actoin on Place object returned
+                System.out.println(" @@@@ GOT PLACE : " + place.getName());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17.0f));
+                Log.i("tag", "Plaes: " + place.getName());
+            }
+            @Override
+            public void onError(Status status) {
+                System.out.println(" @@@@ Places Select Error");
+                Log.i("tag2", "An error occurred: " + status);
+            }
+        });
+
         // Sets up Location services and enables getting user location
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+
     }
 
     // Creates a new thread that's on a timer set to 2-second quanta
