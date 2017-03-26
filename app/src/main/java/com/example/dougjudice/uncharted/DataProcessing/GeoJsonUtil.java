@@ -85,8 +85,9 @@ public class GeoJsonUtil {
     %   FOR FUTURE USE
     %   Node info will be stored on the sever and loaded every time so users don't need to update app on incoming change.
     %   Implement a method to receive a JSON package, and this function will convert it to the NodePolygon object. SEE --hanselgriddle.json-- IN res/raw FOR CORRECT FORMAT
-    %
+    %   Use schema I provide in the three JSON packages ini res/raw
      */
+
     public static NodePolygon generatePolygon(JSONObject object, GoogleMap map){
         System.out.println("Creating Polygon...");
 
@@ -117,6 +118,7 @@ public class GeoJsonUtil {
             String name = object.getString("name");
 
             NodePolygon np = new NodePolygon(p, coor, p_count, name, map);
+            np.getPolygon().setStrokeWidth(1.0f); // Sets how thick lines around polygon are
             p_count++;
 
             return np;

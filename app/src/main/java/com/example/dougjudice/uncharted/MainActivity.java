@@ -27,14 +27,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AccessToken accessToken = AccountKit.getCurrentAccessToken();
+        //AccessToken accessToken = AccountKit.getCurrentAccessToken();
 
-        if (accessToken != null) {
+        //if (accessToken != null) {
             startActivity(new Intent(this, MapsActivity.class));
-        } else {
+        //} else {
             setContentView(R.layout.activity_main);
-            handleLogin();
-        }
+           // handleLogin();
+        //}
         finish();
     }
 

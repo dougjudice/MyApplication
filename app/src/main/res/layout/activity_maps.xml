@@ -3,7 +3,7 @@
 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@id/drawer_layout"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.dougjudice.uncharted.MapsActivity">
@@ -30,14 +30,16 @@
         android:minHeight="?attr/actionBarSize"
         android:background="?attr/colorPrimary" />
     </FrameLayout>
-    <ListView android:id="@+id/left_drawer"
-        android:layout_width="240dp"
+
+    <android.support.design.widget.NavigationView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/left_drawer"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:choiceMode="singleChoice"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:background="#111"/>
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_drawer"
+        app:menu="@menu/activity_drawer_drawer" />
+
 
     <!-- For modifying specific drawer colors, like background, etc. look at colors.xml under res/values
     -->

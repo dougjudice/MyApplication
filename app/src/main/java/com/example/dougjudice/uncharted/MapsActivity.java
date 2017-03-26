@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -14,10 +15,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -63,7 +66,7 @@ import java.util.TimerTask;
 
 
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, NavigationView.OnNavigationItemSelectedListener {
 
     // For testing purposes only:
     ArrayList<String> polyFields = new ArrayList<>();
@@ -93,6 +96,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private CharSequence mDrawerTitle;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mSettings;
+    NavigationView navView = null;
+
+
 
     // probably will need to be fixed later on ?
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults){
@@ -111,16 +117,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        // Set up Drawer
+        // Set up DrawerLayout (contains NavigationView)
         mTitle = "Test";
         mDrawerTitle = "Test 2";
         mSettings = new String[]{"Profile","History","Friends"};
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mSettings));
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        // Set up ActionBar
+        // Sets up NavigationView (the actual drawer)
+        NavigationView navView = (NavigationView) findViewById(R.id.left_drawer);
+        if(navView == null){
+            System.out.println("Null NavigationView error");
+        }
+        navView.setNavigationItemSelectedListener(this);
+
+        // Set up ActionBar (thing on the top of the maps_activity)
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_drawer);
@@ -150,6 +160,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Start the constant tick by creating new Timer Thread (Native Android OS call)
         timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
 
+        // Sets up Location services and enables getting user location
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -157,9 +168,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .build();
     }
 
-    // HANDLES LOCATION AUTO-UPDATE LOGIC W/ THREAD
+    // Creates a new thread that's on a timer set to 2-second quanta
     private class MyTimerTask extends TimerTask implements Runnable {
         @Override
+        //TODO: live past pause?
         public void run(){
             runOnUiThread(new Runnable() {
                 @Override
@@ -177,11 +189,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-    /**
+    /***
     *
-    *   LIFECYCLE FUNCTIONS
-    *
-     */
+    *   ANDROID APP LIFECYCLE FUNCTIONS
+    *   START,STOP,PAUSE,RESUME
+     ***/
 
     protected void onStart(){
         mGoogleApiClient.connect();
@@ -202,13 +214,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onResume(){
 
         super.onResume();
+
+        // Timer already started initially in onCreate. May eventually delete that and just leave it up to onResume ... TODO : look into
         if(firstStart)
             return;
 
         System.out.println("RESUMING");
         timer.schedule(new MyTimerTask(), 1000, 2000);
         updateUI();
-
     }
 
 
@@ -246,14 +259,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             JSONObject obj = GeoJsonUtil.bootJSON(getApplicationContext(), polyFields.get(i));
             NodePolygon np = GeoJsonUtil.generatePolygon(obj,mMap);
             np.getPolygon().setClickable(true);
+            np.setResource(1000);
             pairPolyMap.put(np.getPolygon(),np.getName());
             pairNodeMap.put(np.getName(),np);
         }
 
-        //NodePolygon np = GeoJsonUtil.generatePolygon(obj, mMap);
-
         System.out.println("Mapping...");
-        //Polygon polygon = mMap.addPolygon(np.getPolygonOptions());
 
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
 
@@ -265,16 +276,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 // Perform action on NodePolygon
                 System.out.println("Last Location: lat: " + mLastLocation.getLatitude() + " long : " + mLastLocation.getLongitude() +" timestamp: " + mLastUpdateTime);
-                pg.setFillColor(Color.YELLOW);
                 clickedNode.setPolygon(pg);
-                forceLocationUpdate();
+                forceLocationUpdate(); // default timethread executed statement
+
                 Toast t = Toast.makeText(context, "Opening " + clickedNode.getName() + " node...", Toast.LENGTH_SHORT );
                 t.show();
             }
         });
     }
 
-    // Utility Function for updating camera
+    // Utility Function for updating Coordinates
     public void updateUI(){
         System.out.println("Correcting location... ");
         double lat = mLastLocation.getLatitude();
@@ -282,13 +293,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng currLoc = new LatLng(lat,longi);
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 16.5f));
     }
-
+    // Utility Function for updating Moving Camera (necessary sometimes)
     public void updateUIHard(){
         System.out.println("Correcting location... ");
         double lat = mLastLocation.getLatitude();
         double longi = mLastLocation.getLongitude();
         LatLng currLoc = new LatLng(lat,longi);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 16.5f));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 17.0f));
     }
 
     // *****                                             *****
@@ -314,31 +325,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    // USE THIS FOR FORCING LOCATION UPDATE
+    // Linked to ThreadTimer, executes every 2 Seconds
     public void forceLocationUpdate(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             System.out.println("Permission Granted Immediately");
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             mLastUpdateTime = DateFormat.getDateTimeInstance().format(new Date());
 
-
             // Use this to check if User is within a polygon. checkAllIntersections returns a String which can act as a key to get the appropriate NodePolygon
             if(pairNodeMap != null) {
                 System.out.println("Checking system");
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
-                if (state != null)
+
+                if (state != null){ // User is in a polygon
                     System.out.println("User is currently within: " + state);
-                else { // not in any polygon
+                    NodePolygon overlap = (NodePolygon) pairNodeMap.get(state);
+                    overlap.depleteResourcesOnTick();
+                    System.out.println(" ### REMAINING RESOURCES IN " + state + " : " + overlap.getResourceCount());
+                }
+                else { // User not in any polygon
                     System.out.println("User not in any polygon");
                 }
             }
-
 
             updateUI(); // Used to set the map view if needed
         }
     }
 
-    // Initialzes location services first connection
+    // Initializes location services first connection
     @Override
     public void onConnected(Bundle bundle) {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
@@ -365,7 +379,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             System.out.println("Requesting Permisison");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_LOCATION_REQUEST_CODE);
         }
-        //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
     }
 
     // These don't need to be implemented but need to stay for the sake of the referenced interfaces
@@ -375,7 +388,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //t.show();
         System.out.println("onConnectionSuspended triggered " + i);
     }
-
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         //Toast t = Toast.makeText(context, "Unable to connect to Google Play Services, Location services will be disabled...", Toast.LENGTH_LONG);
@@ -389,7 +401,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onPrepareOptionsMenu(menu);
     }
 
-    // Process clcked options from menu (three vertical dot) tab on right of ActionBar
+    // Process clicked options from menu (three vertical dot) tab on right of ActionBar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
@@ -409,51 +421,58 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onOptionsItemSelected(item);
     }
 
-    // Listens for clicks in the Drawer pulled from the left of the main activity
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
-        }
-    }
-
-    // Processes clicks in the Drawer
-    private void selectItem(int position){
-        System.out.println("Position: " + position);
-        mDrawerList.setItemChecked(position, true);
-
-        // Intent intent = new Intent(this, X.class);
-        // Position is in the mSettings array object, position # corresponds to array spot
-
-        switch(position){
-            case 0:
-                // Profile
-                break;
-            case 1:
-                // History
-                break;
-            case 2:
-                // Friends
-                break;
-            default:
-                System.out.println("Error");
-        }
-
-        mDrawerLayout.closeDrawer(mDrawerList);
-    }
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
         mDrawerToggle.syncState();
     }
-
     @Override
     public void onConfigurationChanged(Configuration newConfig){
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    // Map DrawerLayout options to actions
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        Context c = getApplicationContext();
+
+        if (id == R.id.nav_group) {
+            // Start Group Activity
+            Toast t = Toast.makeText(c, "Opening Group Activity", Toast.LENGTH_SHORT );
+            t.show();
+            startActivity(new Intent(this, GroupActivity.class));
+            setContentView(R.layout.activity_group);
+        } else if (id == R.id.nav_gallery) {
+            Toast t = Toast.makeText(c, "Opening Nav_Gallery Activity", Toast.LENGTH_SHORT );
+            t.show();
+
+        } else if (id == R.id.nav_slideshow) {
+            Toast t = Toast.makeText(c, "Opening Nav_Slideshow Activity", Toast.LENGTH_SHORT );
+            t.show();
+
+        } else if (id == R.id.nav_manage) {
+            Toast t = Toast.makeText(c, "Opening Nav_Manage Activity", Toast.LENGTH_SHORT );
+            t.show();
+
+        } else if (id == R.id.nav_share) {
+            Toast t = Toast.makeText(c, "Opening Nav_Share Activity", Toast.LENGTH_SHORT );
+            t.show();
+
+        } else if (id == R.id.nav_send) {
+            Toast t = Toast.makeText(c, "Opening Nav_Send Activity", Toast.LENGTH_SHORT );
+            t.show();
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 
 }
 

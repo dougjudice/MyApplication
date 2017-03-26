@@ -15,6 +15,12 @@
   limitations under the License.
   -->
 
+<!--
+
+THIS IS THE .xml THAT IS USED FOR THE DRAWER THAT COMES OUT OVER MAPSACTIVITY
+
+-->
+
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/text1"
     android:layout_width="match_parent"
@@ -23,6 +29,6 @@
     android:gravity="center_vertical"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:textColor="#fff"
+    android:textColor="#f442eb"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"/>

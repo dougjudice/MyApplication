@@ -25,6 +25,7 @@ public class NodePolygon extends GamePolygon {
         this.name = name;
         this.polygon = map.addPolygon(po);
         //this.miningUsers = new ArrayList<User>();
+        this.activeMiners = 1;
     }
 
     // Sets up necessary information to show node is ready to be mined
@@ -34,17 +35,23 @@ public class NodePolygon extends GamePolygon {
         this.active = true;
     }
 
+    public int getResourceCount(){
+        return this.resourceCount;
+    }
+
     public String depleteResourcesOnTick(){
         int miners = this.activeMiners;
         //String status = "";
-
+        System.out.println("Attempting to deplete resources");
         if(this.resourceCount <= 0){
             this.active = false;
             this.resourceCount = 0;
-            return "Depleted";
+            return "DEPLETED";
         }
         else{
-            double userMineRate;
+            System.out.println("Resources depleted!");
+            int mineRate = (this.activeMiners); // TODO: Make more complicated
+            this.resourceCount = this.resourceCount - mineRate;
         }
         return "EXCEPTION";
     }

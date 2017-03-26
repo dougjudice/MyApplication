@@ -44,6 +44,7 @@ public final class Utility {
     }
 
     // Uses PolyUtil to compute
+    // Takes user coordinates as 'point' (latitude,longitude), and a Polygon you want to check if the point is in.
     public static boolean pointInPolygon(ArrayList<Double> point, GamePolygon poly){
 
         LatLng userLoc = new LatLng(point.get(0),point.get(1));
