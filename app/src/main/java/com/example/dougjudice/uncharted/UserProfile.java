@@ -3,26 +3,29 @@ package com.example.dougjudice.uncharted;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by dougjudice on 3/25/17.
- */
-
 public class UserProfile {
 
-    // FROM JSON
-    int userID;
-    int groupID;
-    String groupName;
+    private static UserProfile instance;
 
-
-    // FROM FACEBOOK API
-    String userName;
-    ArrayList<UserProfile> friendList = new ArrayList<>();
-    // JPEG userImage = ...
-
-    public UserProfile(){
-
+    private UserProfile() {
 
     }
 
+    public static UserProfile getProfile() {
+        if (instance == null) {
+            instance = new UserProfile();
+        }
+
+        return instance;
+    }
+
+    private String id;
+
+    public void setUserId(String id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return id;
+    }
 }
