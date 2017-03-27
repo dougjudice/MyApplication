@@ -56,7 +56,7 @@ public final class Utility {
 
         boolean contain = PolyUtil.containsLocation(userLoc, coList, true );
 
-        System.out.println(contain + " result from PolyUtil func");
+        //System.out.println(contain + " result from PolyUtil func");
 
         return contain;
 
@@ -85,8 +85,6 @@ public final class Utility {
 
             if(entry == null)
                 break;
-
-            System.out.println(entry.getKey());
 
             ArrayList<Double> arrCor = new ArrayList<>();
 

@@ -49,7 +49,9 @@
                 />
 
         </LinearLayout>
+
     </android.support.v7.widget.Toolbar>
+
     </FrameLayout>
 
     <android.support.design.widget.NavigationView xmlns:app="http://schemas.android.com/apk/res-auto"

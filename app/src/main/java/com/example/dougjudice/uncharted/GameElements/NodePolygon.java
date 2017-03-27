@@ -31,9 +31,13 @@ public class NodePolygon extends GamePolygon {
         this.polygon = map.addPolygon(po);
         //this.miningUsers = new ArrayList<User>();
         this.activeMiners = 1;
+        this.marker = null;
+        /*
         this.marker = map.addMarker(new MarkerOptions()
                 .position(Utility.centroid(coordinates))
+                .visible(false)
                 .title(name));
+                */
     }
 
     // Sets up necessary information to show node is ready to be mined
@@ -46,6 +50,9 @@ public class NodePolygon extends GamePolygon {
 
     public Marker getMarker(){
         return this.marker;
+    }
+    public void setMarker(Marker m){
+        this.marker = m;
     }
 
     public int getResourceCount(){
@@ -70,5 +77,7 @@ public class NodePolygon extends GamePolygon {
     }
 
     public void postMiningStatusToServer(){}
+
+
 
 }
