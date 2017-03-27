@@ -61,8 +61,11 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".GroupActivity"
+            android:name=".SettingsDrawerActivities.GroupActivity"
             android:label="@string/title_activity_group" />
+        <activity
+            android:name=".SettingsDrawerActivities.ResourceActivity"
+            android:label="@string/title_activity_myresource" />
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

@@ -34,6 +34,8 @@ import com.example.dougjudice.uncharted.DataProcessing.*;
 import com.example.dougjudice.uncharted.GameElements.*;
 
 // Maps imports
+import com.example.dougjudice.uncharted.SettingsDrawerActivities.GroupActivity;
+import com.example.dougjudice.uncharted.SettingsDrawerActivities.ResourceActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
@@ -478,8 +480,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivity(new Intent(this, GroupActivity.class));
             setContentView(R.layout.activity_group);
         } else if (id == R.id.nav_gallery) {
-            Toast t = Toast.makeText(c, "Opening Nav_Gallery Activity", Toast.LENGTH_SHORT );
+            Toast t = Toast.makeText(c, "Opening My Resources Activity", Toast.LENGTH_SHORT );
             t.show();
+            startActivity(new Intent(this, ResourceActivity.class));
+            setContentView(R.layout.activity_myresource);
 
         } else if (id == R.id.nav_slideshow) {
             Toast t = Toast.makeText(c, "Opening Nav_Slideshow Activity", Toast.LENGTH_SHORT );
