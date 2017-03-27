@@ -1,6 +1,9 @@
 package com.example.dougjudice.uncharted.GameElements;
 
+import android.animation.ValueAnimator;
+
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -20,6 +23,8 @@ public class NodePolygon extends GamePolygon {
     int activeMiners;   // Denotes number of users mining a node
     int remainingTicks; // Denotes how many game-ticks are left before resource disappears
     Marker marker;
+    ValueAnimator vm;
+    Circle c;
     //ArrayList<User> miningUsers; // TODO
 
     public NodePolygon(PolygonOptions po, ArrayList<ArrayList<Double>> coordinates, int polyID, String name, GoogleMap map){
@@ -38,6 +43,19 @@ public class NodePolygon extends GamePolygon {
                 .visible(false)
                 .title(name));
                 */
+    }
+
+    public ValueAnimator getVm(){
+        return this.vm;
+    }
+    public Circle getCircle(){
+        return this.c;
+    }
+    public void setVm(ValueAnimator vm){
+        this.vm = vm;
+    }
+    public void setCircle(Circle c){
+        this.c = c;
     }
 
     // Sets up necessary information to show node is ready to be mined

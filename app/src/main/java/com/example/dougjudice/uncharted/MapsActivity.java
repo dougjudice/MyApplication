@@ -1,10 +1,12 @@
 package com.example.dougjudice.uncharted;
 
 // Android Imports
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -50,7 +52,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
@@ -63,6 +68,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -94,6 +100,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private CharSequence mTitle;
     private CharSequence mDrawerTitle;
     private ActionBarDrawerToggle mDrawerToggle;
+
+    private Circle lastUserCircle;
+    private long pulseDuration = 1000;
+    private ValueAnimator lastPulseAnimator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,6 +260,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         final Context context = getApplicationContext();
         mMap = googleMap;
 
+        try{
+            boolean success = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.mapstyle));
+
+            if(!success){
+                System.out.println("MapStyle parse fail");
+            }
+        }catch(Resources.NotFoundException e){
+            e.printStackTrace();
+        }
+
         // for testing only TODO: Remove when JSON properly implemented to grab all polygons
         polyFields.add("hanselgriddle");
         polyFields.add("olivebranch");
@@ -303,7 +323,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Marker m = np.getMarker();
         m = mMap.addMarker(new MarkerOptions()
                 .position(Utility.centroid(np.getCoordinates()))
-                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(R.drawable.profile_pic)))
+                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(R.drawable.source_node)))
                 .anchor(0.5f, 0.5f)
                 .title(np.getName()));
         np.setMarker(m);
@@ -369,7 +389,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 //System.out.println("Checking system");
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
-
+                System.out.println("PULSING");
+                pulseMap();
+                //addPulsatingEffect(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
                 if (state != null){ // User is in a polygon
                     System.out.println("User is currently within: " + state);
                     NodePolygon overlap = (NodePolygon) pairNodeMap.get(state);
@@ -485,11 +507,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivity(new Intent(this, ResourceActivity.class));
             setContentView(R.layout.activity_myresource);
 
-        } else if (id == R.id.nav_slideshow) {
-            Toast t = Toast.makeText(c, "Opening Nav_Slideshow Activity", Toast.LENGTH_SHORT );
-            t.show();
-
-        } else if (id == R.id.nav_manage) {
+        }
+        else if (id == R.id.nav_manage) {
             Toast t = Toast.makeText(c, "Opening Nav_Manage Activity", Toast.LENGTH_SHORT );
             t.show();
 
@@ -508,6 +527,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
+
+    // Marker Animation Functions
     private Bitmap getMarkerBitmapFromView(int resId) {
 
         View customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_custom_marker, null);
@@ -526,4 +547,55 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         customMarkerView.draw(canvas);
         return returnedBitmap;
     }
+
+    private void addPulsatingEffect(LatLng userLatlng, NodePolygon np){
+        if(np.getVm() != null){
+            np.getVm().cancel();
+            Log.d("onLocationUpdated: ","cancelled" );
+        }
+        if(np.getCircle() != null)
+            np.getCircle().setCenter(userLatlng);
+
+        final LatLng l = userLatlng;
+        final NodePolygon nep = np;
+        np.setVm(valueAnimate(14f, pulseDuration, new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                if(nep.getCircle() != null)
+                    nep.getCircle().setRadius((Float) animation.getAnimatedValue());
+                else {
+                    nep.setCircle(mMap.addCircle(new CircleOptions()
+                            .center(new LatLng(l.latitude, l.longitude))
+                            .radius((Float) animation.getAnimatedValue())
+                            .strokeColor(Color.parseColor("#7f0ffff3"))
+                            .fillColor(Color.parseColor("#4f80fcdd"))
+                    ));
+                }
+            }
+        }));
+
+    }
+
+    protected ValueAnimator valueAnimate(float accuracy,long duration, ValueAnimator.AnimatorUpdateListener updateListener){
+        Log.d( "valueAnimate: ", "called");
+        ValueAnimator va = ValueAnimator.ofFloat(0,accuracy);
+        va.setDuration(duration);
+        va.addUpdateListener(updateListener);
+        va.setRepeatCount(ValueAnimator.INFINITE);
+        va.setRepeatMode(ValueAnimator.RESTART);
+
+        va.start();
+        return va;
+    }
+    public void pulseMap(){
+        //HashMap.Entry<String, NodePolygon> entry = null;
+
+        for(Object key : pairNodeMap.keySet()) {
+            NodePolygon np = (NodePolygon) pairNodeMap.get(key);
+            System.out.println("PULSING : " + np.getName());
+            addPulsatingEffect(np.getMarker().getPosition(), np);
+        }
+        return;
+    }
+
 }

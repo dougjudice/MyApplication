@@ -3,7 +3,7 @@
     android:id="@+id/custom_marker_view"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#fff">
+    android:background="@android:color/transparent">
 
     <!-- THIS XML DEFINES THE LAYOUT FOR EACH MARKER IMAGE THAT IS OVERLAID ON EACH POLYGON -->
 
@@ -16,6 +16,7 @@
         android:layout_centerHorizontal="true"
         android:innerRadius="0dp"
         android:shape="ring"
+        android:background="@android:color/transparent"
         android:thicknessRatio="1.9">
 
         <!-- DEFINES THE CENTER IMAGE, TODO: REPLACE profile_pic WITH DYNAMIC IMAGE FROM USERS WHO ARE AT THE LOCATION -->
@@ -23,7 +24,8 @@
             android:id="@+id/profile_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/profile_pic"
+            android:src="@drawable/source_node"
+            android:background="@android:color/transparent"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true">
         </ImageView>

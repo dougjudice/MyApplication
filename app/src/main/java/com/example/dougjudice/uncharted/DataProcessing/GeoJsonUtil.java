@@ -100,7 +100,7 @@ public class GeoJsonUtil {
                 p.add(new LatLng(Double.parseDouble(sx),Double.parseDouble(sy)));
             }
 
-            p.fillColor(Color.BLUE);
+            //p.fillColor(Color.BLUE);
             System.out.println("Success");
 
             String name = object.getString("name");

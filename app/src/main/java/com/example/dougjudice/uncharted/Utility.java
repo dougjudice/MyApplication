@@ -1,25 +1,10 @@
 package com.example.dougjudice.uncharted;
 
-import android.content.Context;
-import android.graphics.Color;
 import android.location.Location;
-import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
-import android.widget.Toast;
 
 import com.example.dougjudice.uncharted.GameElements.*;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 
 import java.util.ArrayList;
