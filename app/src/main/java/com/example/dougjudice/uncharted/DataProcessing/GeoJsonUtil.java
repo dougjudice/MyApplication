@@ -110,7 +110,6 @@ public class GeoJsonUtil {
             p_count++;
 
             return np;
-
         }
         catch(org.json.JSONException e){
             e.printStackTrace();

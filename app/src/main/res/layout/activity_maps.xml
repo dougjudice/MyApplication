@@ -50,9 +50,21 @@
 
         </LinearLayout>
 
+
     </android.support.v7.widget.Toolbar>
 
+            <TextView
+                android:id="@+id/mine_notification_tip"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:gravity="center"
+                android:background="#0008ffd6"
+                android:textColor="#00ffffff"
+                android:text="HI"/>
+
     </FrameLayout>
+
 
     <android.support.design.widget.NavigationView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/left_drawer"

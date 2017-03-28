@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
 import android.support.v7.widget.Toolbar;
@@ -95,6 +96,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean mRequestingLocationUpdates = true;
     boolean firstStart = true;
     boolean locationSet = false;
+    TextView resourceToolTip;
+
+    boolean inNode;
 
     private DrawerLayout mDrawerLayout;
     private CharSequence mTitle;
@@ -159,6 +163,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Autocomplete Fragment (Goes inbetween Hamburger drawer icon & Toolbar Menu)
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+
+        resourceToolTip = (TextView)findViewById(R.id.mine_notification_tip);
 
         // Autocomplete Fragment options & listeners
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -323,7 +329,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Marker m = np.getMarker();
         m = mMap.addMarker(new MarkerOptions()
                 .position(Utility.centroid(np.getCoordinates()))
-                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(R.drawable.source_node)))
+                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(R.drawable.rarium))) // Need to update this and view_custom_marker
                 .anchor(0.5f, 0.5f)
                 .title(np.getName()));
         np.setMarker(m);
@@ -395,11 +401,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (state != null){ // User is in a polygon
                     System.out.println("User is currently within: " + state);
                     NodePolygon overlap = (NodePolygon) pairNodeMap.get(state);
+                    if(!inNode){
+
+                        // Set toolTip to color, state
+                        resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(),R.color.rariumBlue));
+                        resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.black));
+                        resourceToolTip.setText("Currently Mining " + state);
+                        inNode = true;
+                    }
                     overlap.depleteResourcesOnTick();
                     //System.out.println(" ### REMAINING RESOURCES IN " + state + " : " + overlap.getResourceCount());
                 }
                 else { // User not in any polygon
                     System.out.println("User not in any polygon");
+
+                    // Set toolTip to transparent
+                    if(inNode) {
+                        resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
+                        resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
+                        resourceToolTip.setText("");
+                        inNode = false;
+                        // 40.5014
+                    }
                 }
             }
 

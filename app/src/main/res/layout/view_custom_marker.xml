@@ -24,7 +24,7 @@
             android:id="@+id/profile_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/source_node"
+            android:src="@drawable/rarium"
             android:background="@android:color/transparent"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true">
