@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.JsonReader;
 import android.widget.Toast;
 
 
@@ -21,10 +22,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.geojson.GeoJsonLayer;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by dougjudice on 3/18/17.
@@ -34,39 +37,6 @@ import java.util.ArrayList;
 public class GeoJsonUtil {
 
     private static int p_count = 0;
-
-    // For testing purposes only, won't be needed in final context
-    public static JSONObject bootJSON(Context context, String file){
-
-        String str = "raw/"+file;
-
-        int rid = context.getResources().getIdentifier(str, null, context.getPackageName());
-
-        InputStream is = context.getResources().openRawResource(rid);
-        Writer writer = new StringWriter();
-        char[] buffer = new char [1024];
-        try{
-                Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-                int n;
-                while((n = reader.read(buffer)) != -1 ){
-                    writer.write(buffer,0,n);
-                }
-            is.close();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-
-        String jsonString = writer.toString();
-
-        try{
-            JSONObject obj = new JSONObject(jsonString);
-            return obj;
-        }
-            catch (org.json.JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /*
     %

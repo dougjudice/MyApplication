@@ -1,45 +1,25 @@
 package com.example.dougjudice.uncharted;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import android.Manifest;
@@ -65,36 +45,22 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.PolygonOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, NavigationView.OnNavigationItemSelectedListener {
-
-    // For testing purposes only:
-    ArrayList<String> polyFields = new ArrayList<>();
-
 
     // Hashmap that maps every polygon's name to its respective polygon for a quick  reference and lookup
     private HashMap pairPolyMap = new HashMap<>();
@@ -152,6 +118,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             System.out.println("Null NavigationView error");
         }
         navView.setNavigationItemSelectedListener(this);
+
+        View header = navView.getHeaderView(0);
+
+        ImageView profilePic = (ImageView) header.findViewById(R.id.profilePic);
+        profilePic.setImageBitmap(UserProfile.getProfile().getPicture());
+
+        TextView nameField = (TextView) header.findViewById(R.id.name_field);
+        nameField.setText(UserProfile.getProfile().getName());
 
         // Set up ActionBar (thing on the top of the maps_activity)
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -290,11 +264,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         final Context context = getApplicationContext();
         mMap = googleMap;
 
-        // for testing only
-        polyFields.add("hanselgriddle");
-        polyFields.add("olivebranch");
-        polyFields.add("oldequeens");
-
         // Add a marker in NB and move the camera
         LatLng NewBrunswick = new LatLng(40.5031574, -74.451819);
         //mMap.addMarker(new MarkerOptions().position(NewBrunswick).title("Marker in New Brunswick"));
@@ -307,14 +276,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_LOCATION_REQUEST_CODE);
         }
 
-        for(int i = 0; i < polyFields.size(); i++) {
-            JSONObject obj = GeoJsonUtil.bootJSON(getApplicationContext(), polyFields.get(i));
-            NodePolygon np = GeoJsonUtil.generatePolygon(obj,mMap);
-            np.getPolygon().setClickable(true);
-            np.setResource(1000);
-            pairPolyMap.put(np.getPolygon(),np.getName());
-            pairNodeMap.put(np.getName(),np);
+        String placesJson = getIntent().getStringExtra("placesJson");
+        try {
+            JSONArray placesJsonArray = new JSONArray(placesJson);
+            for (int i=0; i<placesJson.length(); i++) {
+                JSONObject polyJsonObj = placesJsonArray.getJSONObject(i);
+                NodePolygon np = GeoJsonUtil.generatePolygon(polyJsonObj,mMap);
+                np.getPolygon().setClickable(true);
+                np.setResource(1000);
+                pairPolyMap.put(np.getPolygon(),np.getName());
+                pairNodeMap.put(np.getName(),np);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
         //updateUIHard();
 
         System.out.println("Mapping...");
