@@ -22,11 +22,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
@@ -62,6 +64,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 // JSON Imports
 import org.json.JSONObject;
 
@@ -130,6 +134,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             System.out.println("Null NavigationView error");
         }
         navView.setNavigationItemSelectedListener(this);
+
+        View header = navView.getHeaderView(0);
+
+        ImageView profilePic = (ImageView) header.findViewById(R.id.profilePic);
+        profilePic.setImageBitmap(UserProfile.getProfile().getPicture());
+
+        TextView nameField = (TextView) header.findViewById(R.id.name_field);
+        nameField.setText(UserProfile.getProfile().getName());
 
         // Set up ActionBar (thing on the top of the maps_activity)
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -266,6 +278,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         final Context context = getApplicationContext();
         mMap = googleMap;
 
+        // Add a marker in NB and move the camera
+        LatLng NewBrunswick = new LatLng(40.5031574, -74.451819);
+        //mMap.addMarker(new MarkerOptions().position(NewBrunswick).title("Marker in New Brunswick"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f)); // max zoom is 21.0f
+
         try{
             boolean success = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.mapstyle));
 
@@ -288,17 +305,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_LOCATION_REQUEST_CODE);
         }
 
-        // Initialize all polygons
-        for(int i = 0; i < polyFields.size(); i++) {
-            JSONObject obj = GeoJsonUtil.bootJSON(getApplicationContext(), polyFields.get(i));
-            NodePolygon np = GeoJsonUtil.generatePolygon(obj,mMap);
-            np.getPolygon().setClickable(true);
-            np.setResource(1000);
-            pairPolyMap.put(np.getPolygon(),np.getName());
-            pairNodeMap.put(np.getName(),np);
-            addCustomMarker(np);
-
+        String placesJson = getIntent().getStringExtra("placesJson");
+        try {
+            JSONArray placesJsonArray = new JSONArray(placesJson);
+            for (int i=0; i<placesJson.length(); i++) {
+                JSONObject polyJsonObj = placesJsonArray.getJSONObject(i);
+                NodePolygon np = GeoJsonUtil.generatePolygon(polyJsonObj,mMap);
+                np.getPolygon().setClickable(true);
+                np.setResource(1000);
+                pairPolyMap.put(np.getPolygon(),np.getName());
+                pairNodeMap.put(np.getName(),np);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
+        //updateUIHard();
 
         // Whenever a polygon is clicked, gets that polygon and performs action on it
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {

@@ -1,31 +1,49 @@
 package com.example.dougjudice.uncharted;
 
-import com.example.dougjudice.uncharted.GameElements.GameItem;
+import android.graphics.Bitmap;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by dougjudice on 3/25/17.
- */
-
 public class UserProfile {
 
-    // FROM JSON
-    int userID;
-    int groupID;
-    String groupName;
-    ArrayList<GameItem> inventory = new ArrayList<>();
+    private static class SingletonWrapper {
+        static UserProfile INSTANCE = new UserProfile();
+    }
 
-
-    // FROM FACEBOOK API
-    String userName;
-    ArrayList<UserProfile> friendList = new ArrayList<>();
-    // Bitmap userImage = ...
-
-    public UserProfile(){
-
+    private UserProfile() {
 
     }
 
+    public static UserProfile getProfile() {
+        return SingletonWrapper.INSTANCE;
+    }
+
+    private int id;
+    private Bitmap picture;
+    private String name;
+
+    public synchronized int getId() {
+        return id;
+    }
+
+    public synchronized void setId(int id) {
+        this.id = id;
+    }
+
+    public synchronized Bitmap getPicture() {
+        return picture;
+    }
+
+    public synchronized void setPicture(Bitmap picture) {
+        this.picture = picture;
+    }
+
+    public synchronized String getName() {
+        return this.name;
+    }
+
+    public synchronized void setName(String name) {
+        this.name = name;
+    }
 }
