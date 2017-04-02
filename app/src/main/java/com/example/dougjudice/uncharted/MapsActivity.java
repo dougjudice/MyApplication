@@ -1,6 +1,7 @@
 package com.example.dougjudice.uncharted;
 
 // Android Imports
+import android.Manifest;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
@@ -13,32 +14,26 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.Manifest;
-import android.support.v7.widget.Toolbar;
 
-// My Imports
-import com.example.dougjudice.uncharted.DataProcessing.*;
-import com.example.dougjudice.uncharted.GameElements.*;
-
-// Maps imports
+import com.example.dougjudice.uncharted.DataProcessing.GeoJsonUtil;
+import com.example.dougjudice.uncharted.GameElements.NodePolygon;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.CraftingActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.GroupActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.ResourceActivity;
@@ -66,16 +61,19 @@ import com.google.android.gms.maps.model.Polygon;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-// JSON Imports
 import org.json.JSONObject;
 
-// Java Imports
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+
+// My Imports
+// Maps imports
+// JSON Imports
+// Java Imports
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, NavigationView.OnNavigationItemSelectedListener {
 
@@ -315,6 +313,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 np.setResource(1000);
                 pairPolyMap.put(np.getPolygon(),np.getName());
                 pairNodeMap.put(np.getName(),np);
+                addCustomMarker(np);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -512,7 +511,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             System.out.println("Ret True");
             return true;
         }
-        if(item.getItemId() == R.id.my_location){
+        if(item.getItemId() == R.id.my_location && mLastLocation != null){
             updateUIHard(); // forces camera to user location
             System.out.println("Clicked Bookmark Menu");
         }
