@@ -5,10 +5,7 @@ import android.animation.ValueAnimator;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
-import com.example.dougjudice.uncharted.Utility;
-import com.example.dougjudice.uncharted.ResourceType;
 
 import java.util.ArrayList;
 

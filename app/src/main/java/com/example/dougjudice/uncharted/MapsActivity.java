@@ -37,6 +37,7 @@ import com.example.dougjudice.uncharted.DataProcessing.*;
 import com.example.dougjudice.uncharted.GameElements.*;
 
 // Maps imports
+import com.example.dougjudice.uncharted.SettingsDrawerActivities.CraftingActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.GroupActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.ResourceActivity;
 import com.google.android.gms.common.ConnectionResult;
@@ -69,7 +70,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -314,7 +314,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 clickedNode.setPolygon(pg);
                 forceLocationUpdate(); // default timethread executed statement
 
-                // Fetches marker object with info contained in NodePolygon object
+                // Fetches marker object with info contained in NodePolygon object TODO: Include additional info about resources
                 clickedNode.getMarker().showInfoWindow();
 
                 Toast t = Toast.makeText(context, "Opening " + clickedNode.getName() + " node...", Toast.LENGTH_SHORT );
@@ -532,8 +532,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         }
         else if (id == R.id.nav_manage) {
-            Toast t = Toast.makeText(c, "Opening Nav_Manage Activity", Toast.LENGTH_SHORT );
+            Toast t = Toast.makeText(c, "Opening Crafting Activity", Toast.LENGTH_SHORT );
             t.show();
+            startActivity(new Intent(this, CraftingActivity.class));
+            setContentView(R.layout.activity_craft);
 
         } else if (id == R.id.nav_share) {
             Toast t = Toast.makeText(c, "Opening Nav_Share Activity", Toast.LENGTH_SHORT );

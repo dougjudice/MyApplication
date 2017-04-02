@@ -1,5 +1,7 @@
 package com.example.dougjudice.uncharted;
 
+import com.example.dougjudice.uncharted.GameElements.GameItem;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +15,13 @@ public class UserProfile {
     int userID;
     int groupID;
     String groupName;
+    ArrayList<GameItem> inventory = new ArrayList<>();
 
 
     // FROM FACEBOOK API
     String userName;
     ArrayList<UserProfile> friendList = new ArrayList<>();
-    // JPEG userImage = ...
+    // Bitmap userImage = ...
 
     public UserProfile(){
 

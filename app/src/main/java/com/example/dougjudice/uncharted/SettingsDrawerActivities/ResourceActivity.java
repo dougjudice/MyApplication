@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -37,21 +39,33 @@ public class ResourceActivity extends AppCompatActivity {
         //LinearLayout mContainer = inflater.inflate(R.layout.activity_myresource, null);
         lv = (ListView) findViewById(R.id.my_resources);
 
-        //TODO: Populate with user's resources via their settings and JSON/ Serverlink
-        List<String> resourceList = new ArrayList<String>();
-        String r = "";
-        for(int i = 0 ; i < 10 ; i++){
-            resourceList.add(r + i);
-        }
+        //TODO: Get information from server about user's actual resources
 
-        // populate list
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                this,
-                R.layout.simple_array_view,
-                resourceList
-        );
-        lv.setAdapter(arrayAdapter);
+        String[] items = {
+                "Rareium",
+                "Commonite",
+                "Legendgem"
+        };
+        Integer[] itemID = {
+                R.drawable.rarium,
+                R.drawable.rarium,
+                R.drawable.rarium,
+        };
 
+        // Sets up custom format for item  selection
+        CustomList adapter = new CustomList(ResourceActivity.this, items, itemID);
+
+        lv.setAdapter(adapter);
+
+        // Set up action for click within the listview
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+                System.out.println("item clicked");
+                //TODO: Use item click here.
+            }
+        });
     }
 
     public boolean onOptionsItemSelected(MenuItem item){
@@ -59,7 +73,4 @@ public class ResourceActivity extends AppCompatActivity {
         startActivityForResult(myIntent,0);
         return true;
     }
-
-
-
 }

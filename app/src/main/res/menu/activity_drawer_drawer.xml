@@ -11,23 +11,23 @@
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/resource_img"
-            android:title="My Resources" />
+            android:title="My Inventory" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="My Settings" />
+            android:title="Crafting" />
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Settings">
         <menu>
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="My Settings" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title="About" />
         </menu>
     </item>
 
