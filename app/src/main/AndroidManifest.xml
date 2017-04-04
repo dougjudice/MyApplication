@@ -52,7 +52,6 @@
             android:label="@string/title_activity_myresource" />
         <activity
             android:name=".MainActivity"
-            android:noHistory="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_main">
             <intent-filter>

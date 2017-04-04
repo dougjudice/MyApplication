@@ -199,6 +199,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+        mGoogleApiClient.connect();
     }
 
     // Creates a new thread that's on a timer set to 2-second quanta
@@ -231,7 +232,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         System.out.println("STARTING");
 
         // needed to enable Location Services
-        mGoogleApiClient.connect();
         super.onStart();
     }
     protected void onStop(){
