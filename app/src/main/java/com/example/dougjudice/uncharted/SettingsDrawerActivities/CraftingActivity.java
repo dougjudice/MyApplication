@@ -5,8 +5,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.dougjudice.uncharted.MapsActivity;
 import com.example.dougjudice.uncharted.R;
@@ -18,38 +22,38 @@ import java.util.List;
  * Created by dougjudice on 4/1/17.
  */
 
+/*
+
+This class defines the activity for the crafting system.
+Items that can be crafted are shown on a grid, users click the item to see a description and resource cost.
+Users can craft in the same tooltip that pops up showing information
+Crafted items are then stored in the User's inventory
+
+ */
+
 public class CraftingActivity extends AppCompatActivity {
 
-    ListView lv = null;
+    GridView gridView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_myresource);
+        setContentView(R.layout.activity_craft);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_craft_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        lv = (ListView) findViewById(R.id.my_resources);
+        gridView = (GridView) findViewById(R.id.gridview);
 
-        List<String> resourceList = new ArrayList<String>();
+        gridView.setAdapter(new ImageAdapter(this));
 
-        //GameItem rareium = new GameItem()
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-        /*
-        for(int i = 0 ; i < 10 ; i++){
-            resourceList.add(r + i);
-        }
-*/
-        // populate list
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                this,
-                R.layout.simple_array_view,
-                resourceList
-        );
-        lv.setAdapter(arrayAdapter);
-
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                Toast.makeText(CraftingActivity.this, "Clicking on item", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public boolean onOptionsItemSelected(MenuItem item){

@@ -50,6 +50,11 @@ public class MainActivity extends AppCompatActivity {
         showFacebookLogin();
     }
 
+    protected void onDestroy(){
+        super.onDestroy();
+        System.out.println("DESTROYED");
+    }
+
     private boolean isProperlyLoggedIn() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
 

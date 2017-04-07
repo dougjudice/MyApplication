@@ -1,5 +1,6 @@
 package com.example.dougjudice.uncharted;
 
+import android.content.Context;
 import android.location.Location;
 
 import com.example.dougjudice.uncharted.GameElements.*;
@@ -7,6 +8,13 @@ import com.example.dougjudice.uncharted.GameElements.*;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -88,13 +96,13 @@ public final class Utility {
         return null; // not in any polygon
     }
 
-    // Converst <double> to LatLng
+    // Convert <double> to LatLng
     public static LatLng convertCoor(ArrayList<Double> cor){
         LatLng l = new LatLng(cor.get(0),cor.get(1));
         return l;
     }
 
-    // Get center of a polygon
+    // Use to get center of a polygon, by passing NodePolygon's 'coordinates' parameter
     public static LatLng centroid(ArrayList<ArrayList<Double>> points) {
 
         double centroid[] = { 0.0, 0.0};
@@ -113,6 +121,42 @@ public final class Utility {
         LatLng retVal = new LatLng(centroid[0],centroid[1]);
 
         return retVal;
+    }
+
+    // Use this function to store a file to the device's internal memory
+    public static void storeFile(String name, String body, Context c){
+        FileOutputStream fos;
+        try{
+            fos = c.openFileOutput(name, Context.MODE_PRIVATE);
+            fos.write(body.getBytes());
+            fos.close();
+        } catch(FileNotFoundException e){
+            e.printStackTrace();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    // Use this function to retreive a file from the device's internal memory, in string format
+    public static String fetchFile(String name, Context c){
+        FileInputStream fis;
+        StringBuilder sb = null;
+        try{
+            fis = c.openFileInput(name);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader bufferedReader = new BufferedReader(isr);
+            sb = new StringBuilder();
+            String line;
+            while((line = bufferedReader.readLine()) != null){
+                sb.append(line);
+            }
+        } catch( FileNotFoundException e){
+            e.printStackTrace();
+        } catch( IOException e){
+            e.printStackTrace();
+        }
+        return sb.toString();
+        // null return value indicates some type of error
     }
 
 }

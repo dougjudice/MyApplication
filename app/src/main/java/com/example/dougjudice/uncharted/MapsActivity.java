@@ -100,7 +100,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean locationSet = false;
     TextView resourceToolTip;
 
+    boolean placesJsonInit = false;
+    String placesJson;
+
     boolean inNode;
+
 
     private DrawerLayout mDrawerLayout;
     private CharSequence mTitle;
@@ -113,6 +117,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
@@ -140,6 +145,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         TextView nameField = (TextView) header.findViewById(R.id.name_field);
         nameField.setText(UserProfile.getProfile().getName());
+
+        // Save placesJson through onCreate to avoid destruction of intent state
+        if(!placesJsonInit) {
+            placesJson = getIntent().getStringExtra("placesJson");
+            if(placesJson == null); // Don't do anything if placesJson is null, it should already be initialized and set in the internal memory for the devices!
+            else{
+                Utility.storeFile("placesJson",placesJson,this);
+                placesJsonInit = true;
+            }
+        }
+        System.out.println(placesJson);
 
         // Set up ActionBar (thing on the top of the maps_activity)
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -193,12 +209,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        System.out.println("Building API Client");
         // Sets up Location services and enables getting user location
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+
+        mGoogleApiClient.connect();
     }
 
     // Creates a new thread that's on a timer set to 2-second quanta
@@ -231,7 +250,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         System.out.println("STARTING");
 
         // needed to enable Location Services
-        mGoogleApiClient.connect();
         super.onStart();
     }
     protected void onStop(){
@@ -303,7 +321,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_LOCATION_REQUEST_CODE);
         }
 
-        String placesJson = getIntent().getStringExtra("placesJson");
+        //String placesJson = getIntent().getStringExtra("placesJson");
+        placesJson = Utility.fetchFile("placesJson", this);
         try {
             JSONArray placesJsonArray = new JSONArray(placesJson);
             for (int i=0; i<placesJson.length(); i++) {
@@ -597,7 +616,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void addPulsatingEffect(LatLng userLatlng, NodePolygon np){
         if(np.getVm() != null){
             np.getVm().cancel();
-            Log.d("onLocationUpdated: ","cancelled" );
+            //Log.d("onLocationUpdated: ","cancelled" );
         }
         if(np.getCircle() != null)
             np.getCircle().setCenter(userLatlng);
@@ -623,7 +642,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     protected ValueAnimator valueAnimate(float accuracy,long duration, ValueAnimator.AnimatorUpdateListener updateListener){
-        Log.d( "valueAnimate: ", "called");
+        //Log.d( "valueAnimate: ", "called");
         ValueAnimator va = ValueAnimator.ofFloat(0,accuracy);
         va.setDuration(duration);
         va.addUpdateListener(updateListener);
@@ -638,7 +657,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         for(Object key : pairNodeMap.keySet()) {
             NodePolygon np = (NodePolygon) pairNodeMap.get(key);
-            System.out.println("PULSING : " + np.getName());
+            //System.out.println("PULSING : " + np.getName());
             addPulsatingEffect(np.getMarker().getPosition(), np);
         }
         return;
