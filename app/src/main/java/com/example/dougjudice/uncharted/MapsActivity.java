@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.example.dougjudice.uncharted.DataProcessing.GeoJsonUtil;
 import com.example.dougjudice.uncharted.GameElements.NodePolygon;
+import com.example.dougjudice.uncharted.SettingsDrawerActivities.AboutActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.CraftingActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.GroupActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.ResourceActivity;
@@ -329,7 +330,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 JSONObject polyJsonObj = placesJsonArray.getJSONObject(i);
                 NodePolygon np = GeoJsonUtil.generatePolygon(polyJsonObj,mMap);
                 np.getPolygon().setClickable(true);
-                np.setResource(1000);
+                np.setResource(1000); // TODO: More dynamic
                 pairPolyMap.put(np.getPolygon(),np.getName());
                 pairNodeMap.put(np.getName(),np);
                 addCustomMarker(np);
@@ -371,6 +372,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .position(Utility.centroid(np.getCoordinates()))
                 .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(R.drawable.rarium))) // Need to update this and view_custom_marker
                 .anchor(0.5f, 0.5f)
+                .snippet(""+np.getResourceCount())
                 .title(np.getName()));
         np.setMarker(m);
     }
@@ -582,9 +584,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             t.show();
 
         } else if (id == R.id.nav_send) {
-            Toast t = Toast.makeText(c, "Opening Nav_Send Activity", Toast.LENGTH_SHORT );
+            Toast t = Toast.makeText(c, "Opening About Activity", Toast.LENGTH_SHORT );
             t.show();
-
+            startActivity(new Intent(this, AboutActivity.class));
+            setContentView(R.layout.activity_about);
         }
 
         //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

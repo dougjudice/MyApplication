@@ -1,7 +1,10 @@
 package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -34,11 +37,14 @@ Crafted items are then stored in the User's inventory
 public class CraftingActivity extends AppCompatActivity {
 
     GridView gridView;
+    //AlertDialog.Builder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_craft);
+
+        //final Context c = getApplicationContext();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_craft_toolbar);
         setSupportActionBar(toolbar);
@@ -48,10 +54,40 @@ public class CraftingActivity extends AppCompatActivity {
 
         gridView.setAdapter(new ImageAdapter(this));
 
+        // Sets up actions on grid
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                Toast.makeText(CraftingActivity.this, "Clicking on item", Toast.LENGTH_SHORT).show();
+                //tipBoard
+
+                // convert position in grid to a name
+                String s = getNameById(position);
+                String message = "The Mineral Scanner will boost your mining rate by 50%! \n Crafting it will cost: \n * 100 Commonite \n * 50 Rareium";
+
+                // This is deciding whether you want to craft or not in a dialog box
+                final AlertDialog.Builder builder = new AlertDialog.Builder(CraftingActivity.this);
+                builder.setMessage("Are you sure you want to craft " + s + "?\n" + message);
+                builder.setCancelable(true);
+
+                builder.setPositiveButton(
+                        "Yes",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                // TODO: check user inventory to see if they can craft selected item
+                                Toast.makeText(CraftingActivity.this, "Item Crafted!", Toast.LENGTH_SHORT).show();
+                                dialog.cancel();
+                            }
+                });
+                builder.setNegativeButton(
+                        "No",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int id){
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+
             }
         });
     }
@@ -60,5 +96,13 @@ public class CraftingActivity extends AppCompatActivity {
         Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
         startActivityForResult(myIntent,0);
         return true;
+    }
+
+    public String getNameById(int id){
+        switch(id){
+            case 0: return "Mineral Scanner";
+            case 1: return "Mining Linker";
+            default: return "ITEM_NOT_FOUND";
+        }
     }
 }

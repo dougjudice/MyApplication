@@ -18,15 +18,15 @@
             android:title="Crafting" />
     </group>
 
-    <item android:title="Settings">
+    <item android:title="">
         <menu>
             <item
                 android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@drawable/settings_img"
                 android:title="My Settings" />
             <item
                 android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
+                android:icon="@drawable/about_img"
                 android:title="About" />
         </menu>
     </item>

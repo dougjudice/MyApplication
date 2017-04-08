@@ -13,7 +13,7 @@
     android:thicknessRatio="1.9">
     <!--app:cardBackgroundColor="@android:color/transparent"-->
 
-    <!-- DEFINES THE CENTER IMAGE, TODO: REPLACE profile_pic WITH DYNAMIC IMAGE FROM USERS WHO ARE AT THE LOCATION -->
+    <!-- DEFINES THE CENTER IMAGE -->
     <ImageView
         android:id="@+id/profile_image"
         android:layout_width="60dp"

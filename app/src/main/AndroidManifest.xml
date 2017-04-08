@@ -52,6 +52,9 @@
             android:name=".SettingsDrawerActivities.CraftingActivity"
             android:label="@string/title_activity_crafting" />
         <activity
+            android:name=".SettingsDrawerActivities.AboutActivity"
+            android:label="About"/>
+        <activity
             android:name=".MainActivity"
             android:noHistory="true"
             android:configChanges="orientation|keyboardHidden|screenSize"

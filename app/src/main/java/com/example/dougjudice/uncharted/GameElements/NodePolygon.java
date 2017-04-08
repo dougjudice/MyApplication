@@ -17,11 +17,14 @@ public class NodePolygon extends GamePolygon {
 
     boolean active;     // This determines whether or not the node is currently distributing resources
     int resourceCount;  // This is a counter for the amount of remaining resources when filled
+    String resourceType;// Denotes the name of the resource within the node. 'NONE' when there is none.
     int activeMiners;   // Denotes number of users mining a node
     int remainingTicks; // Denotes how many game-ticks are left before resource disappears
+
     Marker marker;
     ValueAnimator vm;
     Circle c;
+
     //ArrayList<User> miningUsers; // TODO
 
     public NodePolygon(PolygonOptions po, ArrayList<ArrayList<Double>> coordinates, int polyID, String name, GoogleMap map){
@@ -31,15 +34,10 @@ public class NodePolygon extends GamePolygon {
         this.polyID = polyID;
         this.name = name;
         this.polygon = map.addPolygon(po);
-        //this.miningUsers = new ArrayList<User>();
+        this.resourceType = "Rareium";
+
         this.activeMiners = 1;
         this.marker = null;
-        /*
-        this.marker = map.addMarker(new MarkerOptions()
-                .position(Utility.centroid(coordinates))
-                .visible(false)
-                .title(name));
-                */
     }
 
     public ValueAnimator getVm(){
@@ -76,7 +74,7 @@ public class NodePolygon extends GamePolygon {
 
     public String depleteResourcesOnTick(){
         int miners = this.activeMiners;
-        //String status = "";
+
         System.out.println("Attempting to deplete resources");
         if(this.resourceCount <= 0){
             this.active = false;
@@ -87,10 +85,12 @@ public class NodePolygon extends GamePolygon {
             System.out.println("Resources depleted!");
             int mineRate = (this.activeMiners); // TODO: Make more complicated
             this.resourceCount = this.resourceCount - mineRate;
+            this.marker.setSnippet(this.resourceType + ": x" +this.resourceCount); // Changes InfoWindow resource count to reflect actual sum
         }
         return "EXCEPTION";
     }
 
+    //TODO this jawn
     public void postMiningStatusToServer(){}
 
 
