@@ -283,7 +283,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToMapActivity(String placesJson) {
+        /*
         final Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra("placesJson", placesJson);
+        startActivity(intent);
+        */
+        final Intent intent = new Intent(this, IntroActivity.class);
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
     }

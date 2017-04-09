@@ -37,5 +37,24 @@
             android:gravity="center"
             android:text="Welcome to CrowdForce!"/>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="This is an application that was created for our class, Topics in Computer Science. In this class, we asked ourselves a question:"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/rariumBlue"
+            android:text="Why do people move, and is there a better way to manage the way people move?"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="We explore how we can incentivize more mobility between people, by bringing a layer of gameifcation to going out with your friends."/>
+
     </LinearLayout>
 </LinearLayout>

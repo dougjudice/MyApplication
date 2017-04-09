@@ -43,6 +43,9 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"/>
         <activity
+            android:name=".IntroActivity"
+            android:label="Intro"/>
+        <activity
             android:name=".SettingsDrawerActivities.GroupActivity"
             android:label="@string/title_activity_group" />
         <activity
@@ -56,7 +59,7 @@
             android:label="About"/>
         <activity
             android:name=".MainActivity"
-            android:noHistory="true"
+            android:noHistory="false"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_main">
             <intent-filter>

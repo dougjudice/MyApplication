@@ -89,6 +89,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleApiClient mGoogleApiClient;
     private Timer timer = new Timer();
+    boolean timerOn = false;
 
     private static final int MY_LOCATION_REQUEST_CODE = 1;
     private GoogleMap mMap;
@@ -106,6 +107,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     boolean inNode;
 
+    LatLng NewBrunswick = new LatLng(40.5031574, -74.451819);
 
     private DrawerLayout mDrawerLayout;
     private CharSequence mTitle;
@@ -186,7 +188,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         getSupportActionBar().setHomeButtonEnabled(true);
 
         // Start the constant tick by creating new Timer Thread (Native Android OS call)
-        timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
+
+
+        // ^@#^^@#
 
         // Autocomplete Fragment (Goes inbetween Hamburger drawer icon & Toolbar Menu)
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
@@ -296,9 +300,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
         // Add a marker in NB and move the camera
-        LatLng NewBrunswick = new LatLng(40.5031574, -74.451819);
+
         //mMap.addMarker(new MarkerOptions().position(NewBrunswick).title("Marker in New Brunswick"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f)); // max zoom is 21.0f
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f)); // max zoom is 21.0f
 
         try{
             boolean success = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.mapstyle));
@@ -339,7 +343,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
 
-        //updateUIHard();
+        String timerOn = getIntent().getStringExtra("timerOn");
+        if(timerOn == null || timerOn == "") {
+            System.out.println("** STARTING TIMER");
+            timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
+        }
+        else{
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f));
+        }
 
         // Whenever a polygon is clicked, gets that polygon and performs action on it
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {

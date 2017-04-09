@@ -36,8 +36,7 @@ Crafted items are then stored in the User's inventory
 
 public class CraftingActivity extends AppCompatActivity {
 
-    GridView gridView;
-    //AlertDialog.Builder builder;
+    ListView lv = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,16 +49,29 @@ public class CraftingActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        gridView = (GridView) findViewById(R.id.gridview);
+        lv = (ListView) findViewById(R.id.craft_bar);
 
-        gridView.setAdapter(new ImageAdapter(this));
+        //TODO: Get information from server about user's actual resources
 
-        // Sets up actions on grid
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        String[] items = {
+                "Mineral Scanner",
+                "Group Linker"
+        };
+        Integer[] itemID = {
+                R.drawable.laser,
+                R.drawable.linker
+        };
 
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                //tipBoard
+        // Sets up custom format for item  selection
+        CustomList adapter = new CustomList(CraftingActivity.this, items, itemID);
 
+        lv.setAdapter(adapter);
+
+        // Set up action for click within the listview
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
                 // convert position in grid to a name
                 String s = getNameById(position);
                 String message = "The Mineral Scanner will boost your mining rate by 50%! \n Crafting it will cost: \n * 100 Commonite \n * 50 Rareium";
@@ -77,7 +89,7 @@ public class CraftingActivity extends AppCompatActivity {
                                 Toast.makeText(CraftingActivity.this, "Item Crafted!", Toast.LENGTH_SHORT).show();
                                 dialog.cancel();
                             }
-                });
+                        });
                 builder.setNegativeButton(
                         "No",
                         new DialogInterface.OnClickListener(){
@@ -87,13 +99,13 @@ public class CraftingActivity extends AppCompatActivity {
                         });
                 AlertDialog alert = builder.create();
                 alert.show();
-
             }
         });
     }
 
     public boolean onOptionsItemSelected(MenuItem item){
         Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
+        myIntent.putExtra("timerOn", "yes");
         startActivityForResult(myIntent,0);
         return true;
     }

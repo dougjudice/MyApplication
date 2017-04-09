@@ -28,6 +28,7 @@ public class GroupActivity extends AppCompatActivity {
 
     public boolean onOptionsItemSelected(MenuItem item){
         Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
+        myIntent.putExtra("timerOn", "yes");
         startActivityForResult(myIntent,0);
         return true;
     }

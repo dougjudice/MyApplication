@@ -1,7 +1,9 @@
 package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.dougjudice.uncharted.MapsActivity;
 import com.example.dougjudice.uncharted.R;
@@ -44,12 +47,14 @@ public class ResourceActivity extends AppCompatActivity {
         String[] items = {
                 "Rareium",
                 "Commonite",
-                "Legendgem"
+                "Legendgem",
+                "Mineral Scanner"
         };
         Integer[] itemID = {
                 R.drawable.rarium,
                 R.drawable.rarium,
                 R.drawable.rarium,
+                R.drawable.laser
         };
 
         // Sets up custom format for item  selection
@@ -63,14 +68,49 @@ public class ResourceActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id){
                 System.out.println("item clicked");
-                //TODO: Use item click here.
+                String selection = lv.getItemAtPosition(position).toString();
+
+                // TODO: Account for all items later with a switch statement
+                if(selection.equals("Mineral Scanner")){
+                    useItem(selection);
+                }
+                else{
+                    Toast.makeText(ResourceActivity.this, "Cannot use this item!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
     public boolean onOptionsItemSelected(MenuItem item){
         Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
+        myIntent.putExtra("timerOn", "yes");
         startActivityForResult(myIntent,0);
         return true;
+    }
+
+    public void useItem(String item){
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(ResourceActivity.this);
+        builder.setMessage("Are you sure you want to use " + item + "?");
+        builder.setCancelable(true);
+
+        builder.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id){
+                        Toast.makeText(ResourceActivity.this, "Item Used!", Toast.LENGTH_SHORT).show();
+                        // TODO: Activate item within MapsActivity?
+                        dialog.cancel();
+                    }
+                });
+        builder.setNegativeButton(
+                "No",
+                new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int id){
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }

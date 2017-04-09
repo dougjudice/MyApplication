@@ -7,6 +7,9 @@ import java.util.List;
 
 public class UserProfile {
 
+    boolean usingItem; // Determines whether or not the user is using an item, and if an item can be used or not (can only use one at a time)
+
+
     private static class SingletonWrapper {
         static UserProfile INSTANCE = new UserProfile();
     }
