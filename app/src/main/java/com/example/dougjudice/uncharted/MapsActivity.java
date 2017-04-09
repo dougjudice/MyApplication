@@ -3,8 +3,12 @@ package com.example.dougjudice.uncharted;
 // Android Imports
 import android.Manifest;
 import android.animation.ValueAnimator;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -15,6 +19,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -76,7 +81,7 @@ import java.util.TimerTask;
 // JSON Imports
 // Java Imports
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, NavigationView.OnNavigationItemSelectedListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, NavigationView.OnNavigationItemSelectedListener, ServiceCallback {
 
     // For testing purposes only TODO: Remove Later
     ArrayList<String> polyFields = new ArrayList<>();
@@ -129,6 +134,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        // Start Service
+        /*
+        if(PulseService.running == false) {
+            startService(new Intent(this, PulseService.class));
+            registerReceiver(broadcastReceiver, new IntentFilter(
+                    PulseService.BROADCAST_ACTION));
+            PulseService.running = true;
+        */
         // DrawerLayout Init
         mTitle = "Test";
         mDrawerTitle = "Test 2";
@@ -158,7 +171,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 placesJsonInit = true;
             }
         }
-        System.out.println(placesJson);
+        //System.out.println(placesJson);
 
         // Set up ActionBar (thing on the top of the maps_activity)
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -186,11 +199,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Set up ActionBar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-
-        // Start the constant tick by creating new Timer Thread (Native Android OS call)
-
-
-        // ^@#^^@#
 
         // Autocomplete Fragment (Goes inbetween Hamburger drawer icon & Toolbar Menu)
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
@@ -225,18 +233,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
     }
 
-    // Creates a new thread that's on a timer set to 2-second quanta
-    private class MyTimerTask extends TimerTask implements Runnable {
+    PulseService mService;
+    boolean mBound = false;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
         @Override
-        public void run(){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run(){
-                    forceLocationUpdate();
-                }
-            });
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            PulseService.LocalBinder binder = (PulseService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            mService.setCallback(MapsActivity.this);
         }
-    }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
 
     // Creates the actionbar menu and 'inflates' it
     @Override
@@ -253,13 +270,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     protected void onStart(){
         System.out.println("STARTING");
-
+        Intent intent = new Intent(this, PulseService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         // needed to enable Location Services
         super.onStart();
     }
     protected void onStop(){
         System.out.println("STOPPING");
-
+        //unregisterReceiver(broadcastReceiver);
         super.onStop();
     }
     @Override
@@ -271,11 +289,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onResume(){
 
         super.onResume();
+
         if(firstStart) {
             return;
         }
         System.out.println("RESUMING");
-        timer.schedule(new MyTimerTask(), 1000, 2000);
+        //timer.schedule(new MyTimerTask(), 1000, 2000);
         updateUI();
     }
     @Override
@@ -315,9 +334,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         // for testing only TODO: Remove when JSON properly implemented to grab all polygons
-        polyFields.add("hanselgriddle");
-        polyFields.add("olivebranch");
-        polyFields.add("oldequeens");
 
         // Establish Permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
@@ -343,14 +359,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
 
-        String timerOn = getIntent().getStringExtra("timerOn");
-        if(timerOn == null || timerOn == "") {
-            System.out.println("** STARTING TIMER");
-            timer.schedule(new MyTimerTask(), 1000, 2000); // Timer set to 2-second interval (?)
-        }
-        else{
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f));
-        }
+
 
         // Whenever a polygon is clicked, gets that polygon and performs action on it
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
@@ -364,7 +373,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // Perform action on NodePolygon
                 System.out.println("Last Location: lat: " + mLastLocation.getLatitude() + " long : " + mLastLocation.getLongitude() +" timestamp: " + mLastUpdateTime);
                 clickedNode.setPolygon(pg);
-                forceLocationUpdate(); // default timethread executed statement
+                //forceLocationUpdate(); // default timethread executed statement
 
                 // Fetches marker object with info contained in NodePolygon object TODO: Include additional info about resources
                 clickedNode.getMarker().showInfoWindow();
@@ -427,6 +436,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_LOCATION_REQUEST_CODE);
         }
     }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent){
+            System.out.println("Broadcast Received");
+            //forceLocationUpdate(intent);
+        }
+    };
 
     // Linked to ThreadTimer, executes every 2 Seconds
     public void forceLocationUpdate(){
@@ -630,7 +647,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void addPulsatingEffect(LatLng userLatlng, NodePolygon np){
         if(np.getVm() != null){
             np.getVm().cancel();
-            //Log.d("onLocationUpdated: ","cancelled" );
+            Log.d("onLocationUpdated: ","cancelled" );
         }
         if(np.getCircle() != null)
             np.getCircle().setCenter(userLatlng);

@@ -82,9 +82,10 @@ public class NodePolygon extends GamePolygon {
             return "DEPLETED";
         }
         else{
-            System.out.println("Resources depleted!");
+
             int mineRate = (this.activeMiners); // TODO: Make more complicated
             this.resourceCount = this.resourceCount - mineRate;
+            System.out.println("Resources depleted! Remaining: " + this.resourceCount);
             this.marker.setSnippet(this.resourceType + ": x" +this.resourceCount); // Changes InfoWindow resource count to reflect actual sum
         }
         return "EXCEPTION";
