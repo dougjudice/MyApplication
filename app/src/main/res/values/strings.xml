@@ -2,7 +2,7 @@
     <string name="app_name">CrowdForce</string>
     <string name="title_activity_maps"></string>
     <string name="title_activity_drawer">DrawerActivity</string>
-    <string name="title_activity_group">GroupActivity</string>
+    <string name="title_activity_group">My Group</string>
     <string name="title_activity_myresource">My Inventory</string>
     <string name="title_activity_crafting">Crafting</string>
     <string name="title_activity_main">CrowdForce</string>
