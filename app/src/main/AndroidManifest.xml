@@ -60,6 +60,10 @@
             android:name=".SettingsDrawerActivities.AboutActivity"
             android:label="About"/>
         <activity
+            android:name=".SettingsDrawerActivities.PopUp"
+            android:theme="@style/AppTheme.CustomWindow"
+            android:label="Add your friends"/>
+        <activity
             android:name=".MainActivity"
             android:noHistory="false"
             android:configChanges="orientation|keyboardHidden|screenSize"

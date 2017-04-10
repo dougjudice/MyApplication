@@ -1,57 +1,45 @@
 package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBar;
-import android.content.Intent;
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
-import android.view.View;
+import android.util.DisplayMetrics;
 import android.widget.ListView;
 
-import com.example.dougjudice.uncharted.MapsActivity;
 import com.example.dougjudice.uncharted.R;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
-import com.facebook.GraphRequestAsyncTask;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.util.ArrayList;
-
 /**
- * Created by dougjudice on 3/25/17.
+ * Created by dougjudice on 4/9/17.
  */
 
-public class GroupActivity extends AppCompatActivity {
+public class PopUp extends Activity {
 
     ListView lv;
     JSONArray friendList;
-    FloatingActionButton fab;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_group);
+        setContentView(R.layout.activity_popup);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
 
-        fab = (FloatingActionButton) findViewById(R.id.friend_fab);
-        lv = (ListView) findViewById(R.id.group_list);
+        int width = dm.widthPixels;
+        int height = dm.heightPixels;
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v){
-                startActivity(new Intent(GroupActivity.this, PopUp.class));
-            }
-        });
-        /*
+        getWindow().setLayout((int)(width*.8),(int)(height*.8));
+
+        // Friend Stuff
+
+        lv = (ListView) findViewById(R.id.friend_list);
+
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         if(accessToken == null)
             System.out.println("Null accessToken");
@@ -90,7 +78,7 @@ public class GroupActivity extends AppCompatActivity {
                                     friendNames[i] = (friendList.getJSONObject(i).getString("name"));
                                     itemID[i] = R.drawable.about_img;
                                 }
-                                CustomList adapter = new CustomList(GroupActivity.this, friendNames, itemID);
+                                CustomList adapter = new CustomList(PopUp.this, friendNames, itemID);
                                 lv.setAdapter(adapter);
 
 
@@ -108,14 +96,5 @@ public class GroupActivity extends AppCompatActivity {
         );
         graphRequestAsyncTask.setParameters(params);
         graphRequestAsyncTask.executeAsync();
-    */
-
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item){
-        Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
-        myIntent.putExtra("timerOn", "yes");
-        startActivityForResult(myIntent,0);
-        return true;
     }
 }

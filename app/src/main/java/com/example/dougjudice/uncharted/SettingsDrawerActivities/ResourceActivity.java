@@ -52,8 +52,8 @@ public class ResourceActivity extends AppCompatActivity {
         };
         Integer[] itemID = {
                 R.drawable.rarium,
-                R.drawable.rarium,
-                R.drawable.rarium,
+                R.drawable.commonite,
+                R.drawable.legendgem,
                 R.drawable.laser
         };
 
