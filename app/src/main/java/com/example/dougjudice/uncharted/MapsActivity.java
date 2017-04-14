@@ -196,7 +196,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         };
 
-        // Set up ActionBar
+        // Set up ActionBar options
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -325,15 +325,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         try{
             boolean success = mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.mapstyle));
-
             if(!success){
                 System.out.println("MapStyle parse fail");
             }
         }catch(Resources.NotFoundException e){
             e.printStackTrace();
         }
-
-        // for testing only TODO: Remove when JSON properly implemented to grab all polygons
 
         // Establish Permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
@@ -350,7 +347,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 JSONObject polyJsonObj = placesJsonArray.getJSONObject(i);
                 NodePolygon np = GeoJsonUtil.generatePolygon(polyJsonObj,mMap);
                 np.getPolygon().setClickable(true);
-                np.setResource(1000); // TODO: More dynamic
+                np.setResource(1000); // TODO: Get from server
                 pairPolyMap.put(np.getPolygon(),np.getName());
                 pairNodeMap.put(np.getName(),np);
                 addCustomMarker(np);
@@ -375,7 +372,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 clickedNode.setPolygon(pg);
                 //forceLocationUpdate(); // default timethread executed statement
 
-                // Fetches marker object with info contained in NodePolygon object TODO: Include additional info about resources
+                // Fetches marker object with info contained in NodePolygon object TODO: Include additional info about resources, player count, expiration timer
                 clickedNode.getMarker().showInfoWindow();
 
                 Toast t = Toast.makeText(context, "Opening " + clickedNode.getName() + " node...", Toast.LENGTH_SHORT );
@@ -437,6 +434,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    // TODO: Delete this
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent){
@@ -445,7 +443,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
-    // Linked to ThreadTimer, executes every 2 Seconds
+    // Linked to PulseService, executes every 5 Seconds
     public void forceLocationUpdate(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             System.out.println("Permission Granted Immediately");
@@ -467,7 +465,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
                 System.out.println("PULSING");
                 pulseMap();
-                //addPulsatingEffect(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
+
+                // Color the tool tip that appears below the toolbar
                 if (state != null){ // User is in a polygon
                     System.out.println("User is currently within: " + state);
                     NodePolygon overlap = (NodePolygon) pairNodeMap.get(state);
@@ -476,7 +475,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         // Set toolTip to color, state
                         resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(),R.color.rariumBlue));
                         resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.black));
-                        resourceToolTip.setText("Currently Mining " + state);
+                        resourceToolTip.setText("Currently Mining " + state); // TODO: Show mining rate here also
                         inNode = true;
                     }
                     overlap.depleteResourcesOnTick();
@@ -495,8 +494,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }
             }
-
-            updateUI(); // Used to set the map view if needed
+            //updateUI(); TODO: Delete this line?
         }
     }
 
@@ -647,7 +645,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void addPulsatingEffect(LatLng userLatlng, NodePolygon np){
         if(np.getVm() != null){
             np.getVm().cancel();
-            Log.d("onLocationUpdated: ","cancelled" );
+            //Log.d("onLocationUpdated: ","cancelled" );
         }
         if(np.getCircle() != null)
             np.getCircle().setCenter(userLatlng);
@@ -683,6 +681,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         va.start();
         return va;
     }
+
+    // Call to add pulsating effect over all nodes TODO: limit to active nodes by checking for 'active' flag within node when cycling through NodePolygon objects
     public void pulseMap(){
         //HashMap.Entry<String, NodePolygon> entry = null;
 

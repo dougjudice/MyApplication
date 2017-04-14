@@ -28,30 +28,31 @@ public class PopUp extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_popup);
 
+        // Set up popup window parameters
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
 
+        // These default to the width of the phone
         int width = dm.widthPixels;
         int height = dm.heightPixels;
 
+        // Define dimensions of the popup window
         getWindow().setLayout((int)(width*.8),(int)(height*.8));
 
-        // Friend Stuff
-
+        // Build listview
         lv = (ListView) findViewById(R.id.friend_list);
 
+        // Get Facebook token
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         if(accessToken == null)
             System.out.println("Null accessToken");
         System.out.println("Access token initialized");
 
-        // Get Friend List
-
+        // Define what you want from Facebook Token
         Bundle params = new Bundle();
         params.putString("fields", "name");
 
-        CustomList adapter;
-
+        // Perform graph request, runs in own UI thread so all UI support actions need to be included within this function
         GraphRequest graphRequestAsyncTask = new GraphRequest(
                 accessToken,
                 //AccessToken.getCurrentAccessToken(),
@@ -61,10 +62,8 @@ public class PopUp extends Activity {
                 new GraphRequest.Callback() {
                     @Override
                     public void onCompleted(GraphResponse response) {
-                        System.out.println("In onCompleted");
                         //Intent intent = new Intent(GroupActivity.this,FriendsList.class);
                         try {
-                            System.out.println("Trying");
                             friendList = response.getJSONObject().getJSONArray("data");
                             if(friendList == null)
                                 System.out.println("Null ret");
@@ -86,8 +85,6 @@ public class PopUp extends Activity {
                             } catch (JSONException e){
                                 e.printStackTrace();
                             }
-                            //intent.putExtra("jsondata", rawName.toString());
-                            //startActivity(intent);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -95,6 +92,6 @@ public class PopUp extends Activity {
                 }
         );
         graphRequestAsyncTask.setParameters(params);
-        graphRequestAsyncTask.executeAsync();
+        graphRequestAsyncTask.executeAsync(); // Above block of code doesn't execute until this line is reached
     }
 }

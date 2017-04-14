@@ -1,14 +1,19 @@
 package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 
+import android.content.DialogInterface;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.dougjudice.uncharted.MapsActivity;
 import com.example.dougjudice.uncharted.R;
@@ -112,10 +117,52 @@ public class GroupActivity extends AppCompatActivity {
 
     }
 
+    // Handle events from toolbar buttons
     public boolean onOptionsItemSelected(MenuItem item){
+
+        if(item.getItemId() == R.id.change_name){
+            System.out.println("Clicked Bookmark Menu");
+
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setTitle("Enter new name:");
+            alert.setMessage("");
+
+            // Set an EditText view to get user input
+            final EditText input = new EditText(this);
+            alert.setView(input);
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    //TODO: Post update to server
+                    TextView tv = (TextView) findViewById(R.id.group_name);
+                    tv.setText(input.getText());
+                    System.out.println("Sent to DB");
+                }
+            });
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
+
+            return true;
+        }
+
         Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
         myIntent.putExtra("timerOn", "yes");
         startActivityForResult(myIntent,0);
         return true;
     }
+
+    // Creates the actionbar menu and 'inflates' it
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu){
+        getMenuInflater().inflate(R.menu.group_options_menu, menu);
+        return true;
+    }
+
 }
