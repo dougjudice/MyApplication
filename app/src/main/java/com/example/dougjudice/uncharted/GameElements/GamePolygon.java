@@ -35,14 +35,6 @@ public abstract class GamePolygon {
     String name;
     int polyID;
 
-    // based on Ray-Casting see link in Utility
-    public boolean isPointInPolygon(ArrayList<Double> coordinates){
-        if(Utility.pointInPolygon(coordinates, this))
-            return true;
-        else
-            return false;
-    }
-
     public PolygonOptions getPolygonOptions(){
         return this.polygonOptions;
     }

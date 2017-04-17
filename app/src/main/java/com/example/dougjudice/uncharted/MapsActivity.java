@@ -33,6 +33,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +54,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -82,9 +85,6 @@ import java.util.TimerTask;
 // Java Imports
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, NavigationView.OnNavigationItemSelectedListener, ServiceCallback {
-
-    // For testing purposes only TODO: Remove Later
-    ArrayList<String> polyFields = new ArrayList<>();
 
     // Hashmap that maps every polygon's name to its respective polygon for a quick  reference and lookup
     private HashMap pairPolyMap = new HashMap<>();
@@ -212,17 +212,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onPlaceSelected(Place place) {
                 // Perform actoin on Place object returned
                 System.out.println(" @@@@ GOT PLACE : " + place.getName());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17.0f));
-                Log.i("tag", "Plaes: " + place.getName());
+
+                LatLng currLoc = place.getLatLng();
+                CameraUpdate location = CameraUpdateFactory.newLatLngZoom(currLoc,19.0f);
+                mMap.animateCamera(location);
+
+                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 17.0f));
+                //Log.i("tag", "Plaes: " + place.getName());
             }
             @Override
             public void onError(Status status) {
                 System.out.println(" @@@@ Places Select Error");
-                Log.i("tag2", "An error occurred: " + status);
+                //Log.i("tag2", "An error occurred: " + status);
             }
         });
 
-        System.out.println("Building API Client");
         // Sets up Location services and enables getting user location
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -233,6 +237,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
     }
 
+    // For Service thread
     PulseService mService;
     boolean mBound = false;
 
@@ -241,7 +246,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
+
+            // Bound to LocalService, cast the IBinder and get LocalService instance
             PulseService.LocalBinder binder = (PulseService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
@@ -272,12 +278,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         System.out.println("STARTING");
         Intent intent = new Intent(this, PulseService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        // needed to enable Location Services
         super.onStart();
     }
     protected void onStop(){
         System.out.println("STOPPING");
-        //unregisterReceiver(broadcastReceiver);
         super.onStop();
     }
     @Override
@@ -294,7 +298,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
         System.out.println("RESUMING");
-        //timer.schedule(new MyTimerTask(), 1000, 2000);
         updateUI();
     }
     @Override
@@ -319,8 +322,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
         // Add a marker in NB and move the camera
-
-        //mMap.addMarker(new MarkerOptions().position(NewBrunswick).title("Marker in New Brunswick"));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NewBrunswick, 16.0f)); // max zoom is 21.0f
 
         try{
@@ -396,11 +397,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // Utility Function for updating Coordinates
     public void updateUI(){
-        //System.out.println("Correcting location... ");
         double lat = mLastLocation.getLatitude();
         double longi = mLastLocation.getLongitude();
         LatLng currLoc = new LatLng(lat,longi);
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 16.5f));
+
     }
     // Utility Function for updating Moving Camera (necessary sometimes)
     public void updateUIHard(){
@@ -408,7 +408,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         double lat = mLastLocation.getLatitude();
         double longi = mLastLocation.getLongitude();
         LatLng currLoc = new LatLng(lat,longi);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currLoc, 17.0f));
+        CameraUpdate location = CameraUpdateFactory.newLatLngZoom(currLoc,19.0f);
+        mMap.animateCamera(location);
     }
 
     // *****                                             *****
@@ -472,10 +473,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     NodePolygon overlap = (NodePolygon) pairNodeMap.get(state);
                     if(!inNode){
 
+                        Animation animSlideDown = AnimationUtils.loadAnimation(getApplicationContext(),
+                                R.anim.slide_down);
+
                         // Set toolTip to color, state
                         resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(),R.color.rariumBlue));
                         resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.black));
                         resourceToolTip.setText("Currently Mining " + state); // TODO: Show mining rate here also
+                        resourceToolTip.startAnimation(animSlideDown);
                         inNode = true;
                     }
                     overlap.depleteResourcesOnTick();
@@ -486,15 +491,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // Set toolTip to transparent
                     if(inNode) {
-                        resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
-                        resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
-                        resourceToolTip.setText("");
+
+                        Animation animSlideUp = AnimationUtils.loadAnimation(getApplicationContext(),
+                                R.anim.slide_up);
+                        //resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
+                        //resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
+                        //resourceToolTip.setText("");
+                        resourceToolTip.startAnimation(animSlideUp);
                         inNode = false;
                         // 40.5014
                     }
                 }
             }
-            //updateUI(); TODO: Delete this line?
         }
     }
 
@@ -606,7 +614,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             setContentView(R.layout.activity_craft);
 
         } else if (id == R.id.nav_share) {
-            Toast t = Toast.makeText(c, "Opening Nav_Share Activity", Toast.LENGTH_SHORT );
+            Toast t = Toast.makeText(c, "Opening Leaderboard Activity", Toast.LENGTH_SHORT );
             t.show();
 
         } else if (id == R.id.nav_send) {
