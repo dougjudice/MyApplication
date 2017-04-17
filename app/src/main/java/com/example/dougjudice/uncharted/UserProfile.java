@@ -9,6 +9,7 @@ public class UserProfile {
 
     boolean usingItem; // Determines whether or not the user is using an item, and if an item can be used or not (can only use one at a time)
 
+    // Can be called from anywhere
 
     private static class SingletonWrapper {
         static UserProfile INSTANCE = new UserProfile();
@@ -22,7 +23,7 @@ public class UserProfile {
         return SingletonWrapper.INSTANCE;
     }
 
-    private int id;
+    private int id; // OUR ID NOT FACEBOOK'S
     private Bitmap picture;
     private String name;
 

@@ -41,4 +41,14 @@ public class CustomList extends ArrayAdapter<String>{
         imageView.setImageResource(imageId[position]);
         return rowView;
     }
+
+    // usage :  CustomList adapter = ...
+    //          adapter.getStringByPos(position);
+    public String getStringByPos(int position){
+        String s = web[position];
+        return s;
+    }
+    public Integer getImageIdByPos(int position){
+        return imageId[position];
+    }
 }

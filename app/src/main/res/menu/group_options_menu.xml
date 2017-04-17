@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- THIS IS THE MENU FOR THE THREE DOT DROP DOWN IN THE TOP RIGHT CORNER OF MAPS_ACTIVITY -->
+    <!-- THIS IS THE MENU FOR THE THREE DOT DROP DOWN IN THE TOP RIGHT CORNER OF GROUP_ACTIVITY -->
     <item android:id="@+id/change_name"
         android:title="Edit your Group's name"/>
-    <item android:id="@+id/group_location"
-        android:title="Go to my Group Location"/>
 </menu>

@@ -25,8 +25,6 @@ public class PulseService extends Service {
 
     public IBinder mBinder = new LocalBinder();
     private ServiceCallback serviceCallbacks;
-    public static boolean running = false;
-    public int threads=0;
     private Handler mHandler = new Handler();
     private Timer mTimer = null;
 
@@ -59,7 +57,6 @@ public class PulseService extends Service {
         @Override
         public void run() {
             // run on another thread
-            threads++;
             mHandler.post((new Runnable() {
 
                 @Override

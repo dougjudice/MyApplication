@@ -60,7 +60,6 @@ public class IntroActivity extends AppIntro {
         String placesJson = getIntent().getStringExtra("placesJson");
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
-        // Do something when users tap on Skip button.
     }
 
     @Override
@@ -70,7 +69,6 @@ public class IntroActivity extends AppIntro {
         String placesJson = getIntent().getStringExtra("placesJson");
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
-        // Do something when users tap on Done button.
     }
 
     @Override
