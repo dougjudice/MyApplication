@@ -84,21 +84,21 @@ public class PopUp extends Activity {
                             else
                                 System.out.println("Ret success");
 
-                            String[] friendNames = new String[friendList.length()+20];
-                            Integer[] itemID = new Integer[friendList.length()+20];
+                            String[] friendNames = new String[friendList.length()];
+                            Integer[] itemID = new Integer[friendList.length()];
+                            String[] facebookIds = new String[friendList.length()];
                             try{
-                                for(int i = 0; i < friendList.length()+20; i++){
-                                    if(i >= 2){
-                                        System.out.println("Adding");
-                                        friendNames[i] = "TEST";
-                                        itemID[i] = R.drawable.about_img;
-                                        continue;
-                                    }
+                                for(int i = 0; i < friendList.length(); i++){
+
+                                    // ADD FRIENDS FROM FACEBOOK TO friendNames[i] etc.
+
                                     System.out.println("Adding))");
-                                    friendNames[i] = (friendList.getJSONObject(i).getString("name"));
+                                    friendNames[i] = friendList.getJSONObject(i).getString("name");
+                                    facebookIds[i] = friendList.getJSONObject(i).getString("id");
                                     itemID[i] = R.drawable.about_img;
                                 }
-                                final CustomList adapter = new CustomList(PopUp.this, friendNames, itemID);
+
+                                final CustomList adapter = new CustomList(PopUp.this, friendNames, itemID,facebookIds);
                                 lv.setAdapter(adapter);
 
                                 // Action on items in the listview
@@ -108,7 +108,7 @@ public class PopUp extends Activity {
                                     public void onItemClick(AdapterView<?> parent, View view, int position, long id){
                                         // convert position in grid to a name
                                         String clickedName = adapter.getStringByPos(position);
-
+                                        String facebookId = adapter.getFacebookIdByPos(position);
                                         // This is deciding whether you want to craft or not in a dialog box
                                         final AlertDialog.Builder builder = new AlertDialog.Builder(PopUp.this);
                                         builder.setMessage("Are you sure you want to add " + clickedName + " to your Group?");
@@ -120,6 +120,8 @@ public class PopUp extends Activity {
                                                     public void onClick(DialogInterface dialog, int id){
                                                         Toast.makeText(PopUp.this, "Friend Added!", Toast.LENGTH_SHORT).show();
                                                         // TODO: send to DB, if more than 6 are in the group say no
+
+
 
                                                         dialog.cancel();
                                                         finish();

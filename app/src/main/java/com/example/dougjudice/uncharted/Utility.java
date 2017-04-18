@@ -159,4 +159,40 @@ public final class Utility {
         // null return value indicates some type of error
     }
 
+    // Item Retreival (used in multiple places)
+
+    public static String getItemNameById(int id){
+        switch(id){
+            case 0: return "Common Mineral Scanner";
+            case 1: return "Rare Mineral Scanner";
+            case 2: return "Legendary Mineral Scanner";
+            case 3: return "Common Drone";
+            case 4: return "Rare Drone";
+            case 5: return         "Legendary Drone";
+            case 6: return         "Common Jammer";
+            case 7: return         "Rare Jammer";
+            case 8: return         "Legendary Jammer";
+            case 9: return         "Common Barrier";
+            case 10: return         "Rare Barrier";
+            case 11: return         "Legendary Barrier";
+            default: return "ITEM_NOT_FOUND";
+        }
+    }
+    public static String getItemMessageById(int id){
+        switch(id){
+            case 0: return "CMS msg";
+            case 1: return "RMS msg";
+            case 2: return "LMS msg";
+            default: return "ITEM_NOT_FOUND";
+        }
+    }
+    public static int[] getItemResourceReq(int id){
+        switch(id){
+            case 0: return new int[] {115,0,0};
+            case 1: return new int[] {100,15,0};
+            case 2: return new int[] {100,0,15};
+            default: return new int[] {-1,-1,-1}; // error
+        }
+    }
+
 }

@@ -20,12 +20,15 @@ public class CustomList extends ArrayAdapter<String>{
     private final Activity context;
     private final String[] web;
     private final Integer[] imageId;
+    private final String[] facebookIds;
+
     public CustomList(Activity context,
-                      String[] web, Integer[] imageId) {
+                      String[] web, Integer[] imageId, String[] facebookIds) {
         super(context, R.layout.list_item, web);
         this.context = context;
         this.web = web;
         this.imageId = imageId;
+        this.facebookIds = facebookIds;
 
     }
     @Override
@@ -47,6 +50,9 @@ public class CustomList extends ArrayAdapter<String>{
     public String getStringByPos(int position){
         String s = web[position];
         return s;
+    }
+    public String getFacebookIdByPos(int position){
+        return this.facebookIds[position];
     }
     public Integer getImageIdByPos(int position){
         return imageId[position];

@@ -27,6 +27,8 @@ public class UserProfile {
     private Bitmap picture;
     private String name;
 
+    private int[] userMaterials = {0,0,0}; // TODO: get from server
+
     public synchronized int getId() {
         return id;
     }
@@ -50,4 +52,6 @@ public class UserProfile {
     public synchronized void setName(String name) {
         this.name = name;
     }
+
+    public synchronized int[] getUserMaterials(){ return this.userMaterials; }
 }

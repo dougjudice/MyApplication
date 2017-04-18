@@ -58,7 +58,7 @@ public class ResourceActivity extends AppCompatActivity {
         };
 
         // Sets up custom format for item  selection
-        CustomList adapter = new CustomList(ResourceActivity.this, items, itemID);
+        CustomList adapter = new CustomList(ResourceActivity.this, items, itemID, null);
 
         lv.setAdapter(adapter);
 
@@ -84,7 +84,8 @@ public class ResourceActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item){
         Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
         myIntent.putExtra("timerOn", "yes");
-        startActivityForResult(myIntent,0);
+        //startActivityForResult(myIntent,0);
+        finish();
         return true;
     }
 

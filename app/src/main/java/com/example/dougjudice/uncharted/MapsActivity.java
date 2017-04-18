@@ -6,6 +6,7 @@ import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -26,6 +27,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -45,6 +47,8 @@ import com.example.dougjudice.uncharted.SettingsDrawerActivities.AboutActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.CraftingActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.GroupActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.ResourceActivity;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
@@ -104,6 +108,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     boolean mRequestingLocationUpdates = true;
     boolean firstStart = true;
+    boolean pulseStart = false;
     boolean locationSet = false;
     TextView resourceToolTip;
 
@@ -248,8 +253,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                        IBinder service) {
 
             // Bound to LocalService, cast the IBinder and get LocalService instance
+            System.out.println("On Service Connected called");
             PulseService.LocalBinder binder = (PulseService.LocalBinder) service;
             mService = binder.getService();
+            mService.forceStartTimer();
             mBound = true;
             mService.setCallback(MapsActivity.this);
         }
@@ -276,8 +283,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     protected void onStart(){
         System.out.println("STARTING");
-        Intent intent = new Intent(this, PulseService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        System.out.println("Service is: " + mBound);
+        if(!mBound) {
+            Intent intent = new Intent(this, PulseService.class);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        }
         super.onStart();
     }
     protected void onStop(){
@@ -302,7 +312,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     @Override
     protected void onDestroy(){
+        System.out.println("DESTROYING");
         super.onDestroy();
+
+        // When there's no activity in the activity stack, and you press back, onDestroy is called. Need to make sure service is unbound to prevent ServiceCallback leak exception
+        PulseService.cancelTimer();
+        unbindService(mConnection); // Stop service from running in background
         mGoogleApiClient.disconnect();
         timer.purge();
         timer.cancel();
@@ -451,6 +466,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             mLastUpdateTime = DateFormat.getDateTimeInstance().format(new Date());
 
+            if(!pulseStart && mLastLocation != null){
+                pulseStart = true;
+                Animation animFadeOut = AnimationUtils.loadAnimation(getApplicationContext(),
+                        R.anim.fade_out);
+                ImageView splash = (ImageView) findViewById(R.id.load_splash);
+                splash.startAnimation(animFadeOut);
+            }
             // Use this to check if User is within a polygon. checkAllIntersections returns a String which can act as a key to get the appropriate NodePolygon
             if(mLastLocation == null){
                 System.out.println("ERROR: NO USER LOCATION");
@@ -599,19 +621,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast t = Toast.makeText(c, "Opening Group Activity", Toast.LENGTH_SHORT );
             t.show();
             startActivity(new Intent(this, GroupActivity.class));
-            setContentView(R.layout.activity_group);
+            //setContentView(R.layout.activity_group);
         } else if (id == R.id.nav_gallery) {
             Toast t = Toast.makeText(c, "Opening My Resources Activity", Toast.LENGTH_SHORT );
             t.show();
             startActivity(new Intent(this, ResourceActivity.class));
-            setContentView(R.layout.activity_myresource);
+            //setContentView(R.layout.activity_myresource);
 
         }
         else if (id == R.id.nav_manage) {
             Toast t = Toast.makeText(c, "Opening Crafting Activity", Toast.LENGTH_SHORT );
             t.show();
             startActivity(new Intent(this, CraftingActivity.class));
-            setContentView(R.layout.activity_craft);
+            //setContentView(R.layout.activity_craft);
 
         } else if (id == R.id.nav_share) {
             Toast t = Toast.makeText(c, "Opening Leaderboard Activity", Toast.LENGTH_SHORT );
@@ -620,13 +642,45 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (id == R.id.nav_send) {
             Toast t = Toast.makeText(c, "Opening About Activity", Toast.LENGTH_SHORT );
             t.show();
+            //
+            // setContentView(R.layout.activity_about); TODO: Get rid of these everywhere?
             startActivity(new Intent(this, AboutActivity.class));
-            setContentView(R.layout.activity_about);
+        } else if (id == R.id.logout){
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+            builder.setMessage("Are you sure you want to log out?");
+            builder.setCancelable(true);
+
+            builder.setPositiveButton(
+                    "Yes",
+                    new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int id){
+                            Toast.makeText(MapsActivity.this, "Successfully logged out of CrowdForce", Toast.LENGTH_SHORT).show();
+
+                            LoginManager.getInstance().logOut();
+
+                            //stopService(new Intent(this, PulseService.class));
+                            startActivity(new Intent(getBaseContext(), MainActivity.class));
+                            finish();
+                            dialog.cancel();
+                        }
+                    });
+            builder.setNegativeButton(
+                    "No",
+                    new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialog, int id){
+                            return;
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+
+            //setContentView(R.layout.activity_main);
         }
 
         //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.closeDrawer(GravityCompat.START);
-        return true;
+        return false;
     }
 
 

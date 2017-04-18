@@ -48,8 +48,21 @@
 
         </LinearLayout>
 
-
     </android.support.v7.widget.Toolbar>
+
+        <ImageView
+            android:id="@+id/load_splash"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:adjustViewBounds="true"
+            android:maxWidth="350dp"
+            android:maxHeight="350dp"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:src="@drawable/logodes1"
+            android:background="#50ffffff"/>
 
             <TextView
                 android:id="@+id/mine_notification_tip"

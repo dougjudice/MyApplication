@@ -39,7 +39,6 @@ public class GeoJsonUtil {
     private static int p_count = 0;
 
     /*
-    %
     %   FOR FUTURE USE
     %   Node info will be stored on the sever and loaded every time so users don't need to update app on incoming change.
     %   Implement a method to receive a JSON package, and this function will convert it to the NodePolygon object. SEE --hanselgriddle.json-- IN res/raw FOR CORRECT FORMAT

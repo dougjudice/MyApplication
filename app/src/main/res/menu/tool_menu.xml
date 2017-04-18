@@ -3,6 +3,4 @@
     <!-- THIS IS THE MENU FOR THE THREE DOT DROP DOWN IN THE TOP RIGHT CORNER OF MAPS_ACTIVITY -->
     <item android:id="@+id/my_location"
         android:title="Go to my Location"/>
-    <item android:id="@+id/group_location"
-        android:title="Go to my Group Location"/>
 </menu>

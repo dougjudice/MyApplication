@@ -26,11 +26,40 @@ public class PulseService extends Service {
     public IBinder mBinder = new LocalBinder();
     private ServiceCallback serviceCallbacks;
     private Handler mHandler = new Handler();
-    private Timer mTimer = null;
+    private static Timer mTimer = null;
 
     @Override
     public IBinder onBind(Intent intent){
+        System.out.println("Restarting Timer...");
+
+        if(mTimer != null){
+            mTimer.cancel();
+        } else {
+            System.out.println("Making new timer");
+            mTimer = new Timer();
+        }
+        //broadcastIntent = new Intent(BROADCAST_ACTION);
+        mTimer.scheduleAtFixedRate(new timedTask(), 0, NOTIFY_INTERVAL);
+
         return mBinder;
+    }
+
+    public void onRebind(Intent intent){
+        System.out.println("[ REBIND ]Restarting Timer...");
+
+        if(mTimer != null){
+            mTimer.cancel();
+        } else {
+            System.out.println("Making new timer");
+            mTimer = new Timer();
+        }
+        //broadcastIntent = new Intent(BROADCAST_ACTION);
+        mTimer.scheduleAtFixedRate(new timedTask(), 0, NOTIFY_INTERVAL);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent){
+        return true;
     }
 
     public class LocalBinder extends Binder {
@@ -43,13 +72,6 @@ public class PulseService extends Service {
     @Override
     public void onCreate(){
 
-        if(mTimer != null){
-            mTimer.cancel();
-        } else {
-            mTimer = new Timer();
-        }
-        broadcastIntent = new Intent(BROADCAST_ACTION);
-        mTimer.scheduleAtFixedRate(new timedTask(), 0, NOTIFY_INTERVAL);
     }
 
     class timedTask extends TimerTask {
@@ -81,6 +103,24 @@ public class PulseService extends Service {
         }
 
     }
+    public static void cancelTimer(){
+        //mTimer.purge();
+        mTimer.cancel();
+        mTimer = null;
+    }
+
+    // When a user logs out, for some reason, this guy has to be called in onServiceConnected within MapsActivity to make sure that the timer starts again properly
+    public void forceStartTimer(){
+        if(mTimer != null){
+            return; // Timer may have already been started, would cause exception if you didn't return
+        } else {
+            System.out.println("Making new timer");
+            mTimer = new Timer();
+        }
+        //broadcastIntent = new Intent(BROADCAST_ACTION);
+        mTimer.scheduleAtFixedRate(new timedTask(), 0, NOTIFY_INTERVAL);
+    }
+
     public void setCallback(ServiceCallback callback){
         serviceCallbacks = callback;
     }

@@ -289,9 +289,11 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
         */
-        final Intent intent = new Intent(this, IntroActivity.class);
+        // Actually starts IntroActivity for now TODO: Change to make right
+        final Intent intent = new Intent(this, MapsActivity.class);
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
+        finish();
     }
 
     private void showError(String errorMessage) {
