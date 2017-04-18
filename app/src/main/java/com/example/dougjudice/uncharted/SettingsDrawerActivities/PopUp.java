@@ -119,7 +119,7 @@ public class PopUp extends Activity {
                                                 new DialogInterface.OnClickListener(){
                                                     public void onClick(DialogInterface dialog, int id){
                                                         Toast.makeText(PopUp.this, "Friend Added!", Toast.LENGTH_SHORT).show();
-                                                        // TODO: send to DB, if more than 6 are in the group say no
+                                                        // TODO: send  DB, if more than 6 are in the group say no
 
 
 

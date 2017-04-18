@@ -1,6 +1,8 @@
 package com.example.dougjudice.uncharted;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -290,10 +292,24 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         */
         // Actually starts IntroActivity for now TODO: Change to make right
-        final Intent intent = new Intent(this, MapsActivity.class);
-        intent.putExtra("placesJson", placesJson);
-        startActivity(intent);
-        finish();
+
+        SharedPreferences sp = getSharedPreferences("ShaPreferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        boolean firstTime = sp.getBoolean("first",true);
+        if(firstTime){
+            editor.putBoolean("first",false);
+            System.out.println("COMMITTED FIRST ACTIVATION");
+            editor.commit();
+            Intent intent = new Intent(MainActivity.this, IntroActivity.class);
+            intent.putExtra("placesJson", placesJson);
+            startActivity(intent);
+            finish();
+        }else{
+            Intent intent = new Intent(MainActivity.this, MapsActivity.class);
+            intent.putExtra("placesJson", placesJson);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void showError(String errorMessage) {

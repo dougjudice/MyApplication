@@ -60,6 +60,7 @@ public class IntroActivity extends AppIntro {
         String placesJson = getIntent().getStringExtra("placesJson");
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
+        finish();
     }
 
     @Override
@@ -69,6 +70,7 @@ public class IntroActivity extends AppIntro {
         String placesJson = getIntent().getStringExtra("placesJson");
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
+        finish();
     }
 
     @Override

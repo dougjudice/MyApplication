@@ -23,7 +23,7 @@
         android:layout_centerHorizontal="true">
     </ImageView>
 
-    <!-- DEFINES LAYOUT FOR BUBBLE NEXT TO EACH MARKER IMAGE -->
+    <!-- DEFINES LAYOUT FOR BUBBLE NEXT TO EACH MARKER IMAGE TODO: Get rid of 6+ -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="20dp">

@@ -45,8 +45,8 @@ public class CustomList extends ArrayAdapter<String>{
         return rowView;
     }
 
-    // usage :  CustomList adapter = ...
-    //          adapter.getStringByPos(position);
+    // usage :  0: CustomList adapter = ...
+    //          1: String s = adapter.getStringByPos(position);
     public String getStringByPos(int position){
         String s = web[position];
         return s;
