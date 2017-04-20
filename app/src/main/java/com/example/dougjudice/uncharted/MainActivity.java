@@ -291,7 +291,6 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("placesJson", placesJson);
         startActivity(intent);
         */
-        // Actually starts IntroActivity for now TODO: Change to make right
 
         SharedPreferences sp = getSharedPreferences("ShaPreferences", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
