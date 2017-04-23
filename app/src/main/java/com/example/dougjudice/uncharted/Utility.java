@@ -175,6 +175,9 @@ public final class Utility {
             case 9: return         "Common Barrier";
             case 10: return         "Rare Barrier";
             case 11: return         "Legendary Barrier";
+            case 20: return "Commonite";
+            case 21: return "Rareium";
+            case 22: return "Legendgem";
             default: return "ITEM_NOT_FOUND";
         }
     }
@@ -191,7 +194,29 @@ public final class Utility {
             case 0: return new int[] {115,0,0};
             case 1: return new int[] {100,15,0};
             case 2: return new int[] {100,0,15};
-            default: return new int[] {-1,-1,-1}; // error
+            default: return null; // error
+        }
+    }
+    public static Integer getItemImageSource(int id){
+        switch(id){
+            case 0: return  R.drawable.mineral_scanner_common;
+            case 1: return R.drawable.mineral_scanner_common;
+            case 2: return R.drawable.mineral_scanner_rare;
+            case 3: return       R.drawable.mineral_scanner_legendary;
+            case 4: return        R.drawable.about_img;
+            case 5: return        R.drawable.about_img;
+            case 6: return        R.drawable.about_img;
+            case 7: return        R.drawable.jammer_common;
+            case 8: return        R.drawable.jammer_rare;
+            case 9: return        R.drawable.jammer_legendary;
+            case 10: return        R.drawable.barrier_common;
+            case 11: return        R.drawable.barrier_rare;
+            case 12: return        R.drawable.barrier_legendary;
+            case 20: return R.drawable.commonite;
+            case 21: return R.drawable.rarium;
+            case 22: return R.drawable.legendgem;
+
+            default: return null;
         }
     }
 

@@ -79,7 +79,10 @@
             android:src="@drawable/about_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|left"
+            android:layout_gravity="bottom|right"
+            android:adjustViewBounds="true"
+            android:maxWidth="85dp"
+            android:maxHeight="85dp"
             android:layout_margin="16dp"
             app:layout_anchorGravity="bottom|right|end"/>
 

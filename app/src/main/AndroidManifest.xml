@@ -60,6 +60,9 @@
             android:name=".SettingsDrawerActivities.AboutActivity"
             android:label="About"/>
         <activity
+            android:name=".SettingsDrawerActivities.LeaderboardActivity"
+            android:label="Leaderboard"/>
+        <activity
             android:name=".SettingsDrawerActivities.PopUp"
             android:theme="@style/AppTheme.CustomWindow"
             android:label="Add your friends"/>

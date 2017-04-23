@@ -1,7 +1,9 @@
 package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -29,10 +31,17 @@ public class ResourceActivity extends AppCompatActivity {
 
     ListView lv = null;
 
+    SharedPreferences sp;
+
+    int itemReturnId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_myresource);
+
+        // Set up shared preferences for getting user info
+        sp = getSharedPreferences("ItemPref", Context.MODE_PRIVATE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
@@ -44,7 +53,14 @@ public class ResourceActivity extends AppCompatActivity {
 
         //TODO: Get information from server about user's actual resources
 
+        ArrayList<String> inventory = new ArrayList<>();
+
+        for(int i = 0; i < inventory.size(); i++){
+            // TODO: Load inventory
+        }
+
         String[] items = {
+                // Utility.getItemNameById(inventory.get(i))...
                 "Rareium",
                 "Commonite",
                 "Legendgem",
@@ -54,7 +70,7 @@ public class ResourceActivity extends AppCompatActivity {
                 R.drawable.rarium,
                 R.drawable.commonite,
                 R.drawable.legendgem,
-                R.drawable.laser
+                R.drawable.mineral_scanner_common
         };
 
         // Sets up custom format for item  selection
@@ -91,6 +107,13 @@ public class ResourceActivity extends AppCompatActivity {
 
     public void useItem(String item){
 
+        final boolean itemInUse = sp.getBoolean("itemInUse", false);
+
+        if(itemInUse){
+            Toast.makeText(ResourceActivity.this, "You can only have one item active at a time", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         final AlertDialog.Builder builder = new AlertDialog.Builder(ResourceActivity.this);
         builder.setMessage("Are you sure you want to use " + item + "?");
         builder.setCancelable(true);
@@ -100,7 +123,15 @@ public class ResourceActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int id){
                         Toast.makeText(ResourceActivity.this, "Item Used!", Toast.LENGTH_SHORT).show();
-                        // TODO: Activate item within MapsActivity?
+                        itemReturnId = 0;
+
+                        SharedPreferences.Editor editor = sp.edit();
+
+                        editor.putBoolean("itemInUse",true);
+                        editor.putInt("itemReturnId",itemReturnId);
+                        editor.commit();
+                        System.out.println("Item placed successfully : " + sp.getBoolean("itemInUse",false));
+
                         dialog.cancel();
                     }
                 });

@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -46,6 +47,7 @@ import com.example.dougjudice.uncharted.GameElements.NodePolygon;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.AboutActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.CraftingActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.GroupActivity;
+import com.example.dougjudice.uncharted.SettingsDrawerActivities.LeaderboardActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.ResourceActivity;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
@@ -100,6 +102,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Timer timer = new Timer();
     boolean timerOn = false;
 
+    int counter;
+
+    boolean itemFaded = false;
+    boolean canExpire = false; // Used for showing the toast 'Item Expired!'
+
     private static final int MY_LOCATION_REQUEST_CODE = 1;
     private GoogleMap mMap;
 
@@ -111,6 +118,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     boolean pulseStart = false;
     boolean locationSet = false;
     TextView resourceToolTip;
+    ImageView inUseItem;
 
     boolean placesJsonInit = false;
     String placesJson;
@@ -209,6 +217,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
         resourceToolTip = (TextView)findViewById(R.id.mine_notification_tip);
+        inUseItem = (ImageView) findViewById(R.id.active_item_img);
 
         // Autocomplete Fragment options & listeners
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -372,7 +381,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
 
-
+        // Disables the Google Maps redirect button in bottom right from appearing when you click a marker
+        mMap.getUiSettings().setMapToolbarEnabled(false);
 
         // Whenever a polygon is clicked, gets that polygon and performs action on it
         mMap.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
@@ -488,6 +498,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
                 System.out.println("PULSING");
                 pulseMap();
+                counter++;
+                updateItem();
 
                 // Color the tool tip that appears below the toolbar
                 if (state != null){ // User is in a polygon
@@ -618,26 +630,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (id == R.id.nav_group) {
             // Start Group Activity
-            Toast t = Toast.makeText(c, "Opening Group Activity", Toast.LENGTH_SHORT );
-            t.show();
+            //Toast t = Toast.makeText(c, "Opening Group Activity", Toast.LENGTH_SHORT );
+            //t.show();
             startActivity(new Intent(this, GroupActivity.class));
             //setContentView(R.layout.activity_group);
         } else if (id == R.id.nav_gallery) {
-            Toast t = Toast.makeText(c, "Opening My Resources Activity", Toast.LENGTH_SHORT );
-            t.show();
+            //Toast t = Toast.makeText(c, "Opening My Resources Activity", Toast.LENGTH_SHORT );
+            //t.show();
             startActivity(new Intent(this, ResourceActivity.class));
             //setContentView(R.layout.activity_myresource);
 
         }
         else if (id == R.id.nav_manage) {
-            Toast t = Toast.makeText(c, "Opening Crafting Activity", Toast.LENGTH_SHORT );
-            t.show();
+            //Toast t = Toast.makeText(c, "Opening Crafting Activity", Toast.LENGTH_SHORT );
+            //t.show();
             startActivity(new Intent(this, CraftingActivity.class));
             //setContentView(R.layout.activity_craft);
 
         } else if (id == R.id.nav_share) {
-            Toast t = Toast.makeText(c, "Opening Leaderboard Activity", Toast.LENGTH_SHORT );
-            t.show();
+            //Toast t = Toast.makeText(c, "Opening Leaderboard Activity", Toast.LENGTH_SHORT );
+            //t.show();
+            startActivity(new Intent(this, LeaderboardActivity.class));
 
         } else if (id == R.id.nav_send) {
             Toast t = Toast.makeText(c, "Opening About Activity", Toast.LENGTH_SHORT );
@@ -744,7 +757,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return va;
     }
 
-    // Call to add pulsating effect over all nodes TODO: limit to active nodes by checking for 'active' flag within node when cycling through NodePolygon objects
     public void pulseMap(){
         //HashMap.Entry<String, NodePolygon> entry = null;
 
@@ -754,6 +766,51 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             addPulsatingEffect(np.getMarker().getPosition(), np);
         }
         return;
+    }
+
+    // Updates UI to reflect item is in use
+    public void updateItem(){
+        SharedPreferences sp = getSharedPreferences("ItemPref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+
+        //TODO: Testing, remove this later when item expiration info is moved to server
+        if(counter > 10){
+            editor.putBoolean("itemInUse",false);
+            editor.putInt("itemReturnId",-1);
+            editor.commit();
+
+        }
+
+        boolean itemInUse = sp.getBoolean("itemInUse",false);
+
+        System.out.println("Counter : " + counter + " itemInUse =  " + itemInUse);
+        if(itemInUse){
+            int itemId = sp.getInt("itemReturnId",-1);
+            if(itemId < 0){
+                System.out.println("ITEM_NOT_FOUND_ERROR");
+                return;
+            }
+            Animation animFadeIn = AnimationUtils.loadAnimation(getApplicationContext(),
+                    R.anim.fade_in);
+            inUseItem.setImageResource(Utility.getItemImageSource(itemId)); // change item pic
+            inUseItem.setAnimation(animFadeIn);
+            itemFaded = false;
+            canExpire = true;
+        }
+        else if(!itemFaded && !itemInUse){
+            Animation animFadeOut = AnimationUtils.loadAnimation(getApplicationContext(),
+                    R.anim.fade_out);
+            inUseItem.startAnimation(animFadeOut);
+            itemFaded = true;
+            if(canExpire) {
+                Toast.makeText(MapsActivity.this, "Item Expired!", Toast.LENGTH_SHORT).show();
+                canExpire = false;
+            }
+        }
+        else{
+            return;
+        }
+
     }
 
 }
