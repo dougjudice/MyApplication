@@ -23,12 +23,11 @@ public class LeaderboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leaderboard);
 
-        //final Context c = getApplicationContext();
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.my_craft_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.leaderboard_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+
     public boolean onOptionsItemSelected(MenuItem item){
         Intent myIntent = new Intent(getApplicationContext(), MapsActivity.class);
         myIntent.putExtra("timerOn", "yes");

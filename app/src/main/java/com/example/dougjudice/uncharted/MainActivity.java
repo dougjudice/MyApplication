@@ -20,7 +20,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
@@ -54,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // This gets the facebook keyhash for interfacing with the facebook API (just cmd+f 'KeyHash' to find it in log)
-        try{
+        /*try{
             PackageInfo info = getPackageManager().getPackageInfo(
                     "com.example.dougjudice.uncharted", PackageManager.GET_SIGNATURES);
             for (Signature signature : info.signatures) {
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         } catch (NoSuchAlgorithmException e) {
 
-        }
+        }*/
 
         if (isProperlyLoggedIn()) {
             authenticateWithLoginServer();
@@ -139,7 +138,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    UserProfile.getProfile().setId(Integer.parseInt(response.body().string()));
+                    String json = response.body().string();
+                    try {
+                        UserProfile profile = UserProfile.deserialize(json);
+                        UserProfile.setProfile(profile);
+                    } catch (JSONException e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                onNetworkError(getResources().getString(R.string.login_server_connection_error));
+                            }
+                        });
+                    }
                     populateData();
                 } else {
                     runOnUiThread(new Runnable() {

@@ -2,6 +2,8 @@ package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
@@ -11,7 +13,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.dougjudice.uncharted.GameElements.PlayerGroup;
 import com.example.dougjudice.uncharted.R;
+import com.example.dougjudice.uncharted.UserProfile;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
@@ -19,6 +23,16 @@ import com.facebook.HttpMethod;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by dougjudice on 4/9/17.
@@ -28,6 +42,7 @@ public class PopUp extends Activity {
 
     ListView lv;
     JSONArray friendList;
+    PlayerGroup group;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -53,6 +68,8 @@ public class PopUp extends Activity {
         // Define dimensions of the popup window
         getWindow().setLayout((int)(width*.8),(int)(height*.8));
 
+        group = getIntent().getExtras().getParcelable("group");
+
         // Build listview
         lv = (ListView) findViewById(R.id.friend_list);
 
@@ -76,9 +93,9 @@ public class PopUp extends Activity {
                 new GraphRequest.Callback() {
                     @Override
                     public void onCompleted(GraphResponse response) {
-                        //Intent intent = new Intent(GroupActivity.this,FriendsList.class);
                         try {
                             friendList = response.getJSONObject().getJSONArray("data");
+                            // String pictureUrl = response.getJSONObject("picture").getJSONObject("data").getString("url");
                             if(friendList == null)
                                 System.out.println("Null ret");
                             else
@@ -108,22 +125,21 @@ public class PopUp extends Activity {
                                     public void onItemClick(AdapterView<?> parent, View view, int position, long id){
                                         // convert position in grid to a name
                                         String clickedName = adapter.getStringByPos(position);
-                                        String facebookId = adapter.getFacebookIdByPos(position);
+                                        final String facebookId = adapter.getFacebookIdByPos(position);
                                         // This is deciding whether you want to craft or not in a dialog box
                                         final AlertDialog.Builder builder = new AlertDialog.Builder(PopUp.this);
-                                        builder.setMessage("Are you sure you want to add " + clickedName + " to your Group?");
+                                        builder.setMessage("Are you sure you want to add " + clickedName + " " + group.name);
                                         builder.setCancelable(true);
 
                                         builder.setPositiveButton(
                                                 "Yes",
                                                 new DialogInterface.OnClickListener(){
                                                     public void onClick(DialogInterface dialog, int id){
-                                                        Toast.makeText(PopUp.this, "Friend Added!", Toast.LENGTH_SHORT).show();
+                                                        //Toast.makeText(PopUp.this, "Friend Added!", Toast.LENGTH_SHORT).show();
                                                         // TODO: send  DB, if more than 6 are in the group say no
-
-
-
-                                                        dialog.cancel();
+                                                        Intent resultIntent = new Intent();
+                                                        resultIntent.putExtra("friendFacebookId", facebookId);
+                                                        setResult(RESULT_OK, resultIntent);
                                                         finish();
                                                     }
                                                 });
@@ -132,6 +148,8 @@ public class PopUp extends Activity {
                                                 new DialogInterface.OnClickListener(){
                                                     public void onClick(DialogInterface dialog, int id){
                                                         dialog.cancel();
+                                                        setResult(RESULT_CANCELED);
+                                                        finish();
                                                     }
                                                 });
                                         AlertDialog alert = builder.create();
@@ -142,14 +160,25 @@ public class PopUp extends Activity {
 
                             } catch (JSONException e){
                                 e.printStackTrace();
+                                showError("Could not get data from Facebook");
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            showError("Could not get data from Facebook");
                         }
                     }
                 }
         );
         graphRequestAsyncTask.setParameters(params);
         graphRequestAsyncTask.executeAsync(); // Above block of code doesn't execute until this line is reached
+    }
+
+    private void showError(String errorMessage) {
+
+        new AlertDialog.Builder(this)
+                .setMessage(errorMessage)
+                .setTitle(R.string.group_error)
+                .create()
+                .show();
     }
 }

@@ -2,9 +2,10 @@
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
-    <!-- THIS FILE DEFINES HOW AN ITEM LOOKS WHEN VIEWED IN THE INVENTORY/GROUP/POPUP ACTIVITY -->
+    <!-- THIS FILE DEFINES HOW AN ITEM LOOKS WHEN A CUSTOM ADAPTER IS USED -->
 
     <TableRow>
+
         <ImageView
             android:id="@+id/rsc_img"
             android:layout_width="50dp"
