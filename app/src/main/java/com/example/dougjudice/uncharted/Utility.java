@@ -183,9 +183,21 @@ public final class Utility {
     }
     public static String getItemMessageById(int id){
         switch(id){
-            case 0: return "CMS msg";
-            case 1: return "RMS msg";
-            case 2: return "LMS msg";
+            case 0: return "The Common Mineral Scanner will let you see Commonite Nodes in the world before they're about to become active. This will last for 6 hours.";
+            case 1: return "The Rare Mineral Scanner will let you see Rareium Nodes in the world before they're about to become active. This will last for 6 hours.";
+            case 2: return "The Legendary Mineral Scanner will let you see Legendgem Nodes in the world before they're about to become active. This will last for 10 hours.";
+            case 3: return "The Common Drone will boost your mining rate by 7 points. This effect will last 1 hour";
+            case 4: return "The Rare Drone will boost your mining rate by 12 points. This effect will last 1 hour";
+            case 5: return "The Legendary Drone will boost your mining rate by 16 points, and an additional 2 points for every present group member in the same node. This effect will last 1 hour";
+            case 6: return "The Common Jammer will lower the mining rate of all non-group members in the same node by 5 points. This effect will last 1 hour";
+            case 7: return "The Rare Jammer will lower the mining rate of all non-group members in the same node by 10 points. This effect will last 1 hour";
+            case 8: return "The Legendary Jammer will lower the mining rate of all non-group members in the same node by 15 points, and make them more vulnerable to attacks. This effect will last 1 hour";
+            case 9: return "The Common Barrier will boost your resistance to enemy attacks by 5 points. This effect will last 1 hour";
+            case 10: return "The Rare Barrier will boost your resistance to enemy attacks by 10 points, plus an additional 2 points for every group member in the same node. This effect will last 1 hour";
+            case 11: return "The Legendary Barrier will boost your resistance to enemy attacks by 15 points, pluse an additional 5 points for every group member in the same node. This effect will last 1 hour";
+            case 20: return "Commonite is the most common gem in the game. It is used to make nearly every item.";
+            case 21: return "Rareium is the second rarest gem in the game. It is used to craft many higher-level items.";
+            case 22: return "Legendgem is the rarest gem of them all. It is used to craft legendary items with additional effects.";
             default: return "ITEM_NOT_FOUND";
         }
     }
@@ -194,6 +206,15 @@ public final class Utility {
             case 0: return new int[] {115,0,0};
             case 1: return new int[] {100,15,0};
             case 2: return new int[] {100,0,15};
+            case 3: return new int[] {120,10,0};
+            case 4: return new int[] {130,25,0};
+            case 5: return new int[] {130,0,20};
+            case 6: return new int[] {200,0,0};
+            case 7: return new int[] {150,25,0};
+            case 8: return new int[] {150,10,25};
+            case 9: return new int[] {200,0,0};
+            case 10: return new int[] {75,50,0};
+            case 11: return new int[] {100,0,50};
             default: return null; // error
         }
     }
@@ -203,9 +224,9 @@ public final class Utility {
             case 1: return R.drawable.mineral_scanner_common;
             case 2: return R.drawable.mineral_scanner_rare;
             case 3: return       R.drawable.mineral_scanner_legendary;
-            case 4: return        R.drawable.about_img;
-            case 5: return        R.drawable.about_img;
-            case 6: return        R.drawable.about_img;
+            case 4: return        R.drawable.commonite_drone;
+            case 5: return        R.drawable.rareium_drone;
+            case 6: return        R.drawable.legendgem_drone;
             case 7: return        R.drawable.jammer_common;
             case 8: return        R.drawable.jammer_rare;
             case 9: return        R.drawable.jammer_legendary;

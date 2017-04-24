@@ -95,5 +95,48 @@ public class NodePolygon extends GamePolygon {
     public void postMiningStatusToServer(){}
 
 
+    public double computeMineRate(){
+        double result = 1.0;
+
+        int ATTACK = 100; int DEFENSE = 100;
+
+        // in order: COMMON/RARE/LEGENDARY
+        int[] JAM_COUNT = new int[] {0,0,0}; // TODO: GET NUMBER OF ENEMY JAMMERS IN SAME NODE
+        int[] BAR_COUNT = new int[] {0,0,0}; // TODO: GET NUMBER OF GROUP BARRIERS IN SAME NODE
+        int[] DRN_COUNT = new int[] {0,0,0}; // TODO: GET NUMBER OF GROUP DRONES IN SAME NODE
+
+        int COMPANIONS = 0; // TODO: GET NUMBER OF GROUP MEMBERS IN SAME NODE;
+
+        if(JAM_COUNT[2] > 0){
+            // Defense lowered by legendary jammer
+            DEFENSE = DEFENSE - JAM_COUNT[2]*15;
+        }
+
+        // Compute Defense
+        for(int i = 0; i < BAR_COUNT.length; i++){
+            switch(i){
+                case 0: DEFENSE=DEFENSE + (BAR_COUNT[i] * 5);
+                case 1: DEFENSE=DEFENSE + (BAR_COUNT[i] * 10) + (COMPANIONS * 2);
+                case 2: DEFENSE=DEFENSE + (BAR_COUNT[i] * 15) + (COMPANIONS * 5);
+                default: break;
+            }
+        }
+        System.out.println("DEFENSE: " + DEFENSE);
+
+        double DEF_SCORE = DEFENSE / 120;
+
+        for(int i = 0; i < JAM_COUNT.length; i++){
+            switch(i){
+                case 0: ATTACK=ATTACK - (int)Math.floor(((JAM_COUNT[i] * 5)) * DEF_SCORE) + (DRN_COUNT[i] * 7);
+                case 1: ATTACK=ATTACK - (int)Math.floor(((JAM_COUNT[i] * 10)) * DEF_SCORE) + (DRN_COUNT[i] * 12);
+                case 2: ATTACK=ATTACK - (int)Math.floor(((JAM_COUNT[i] * 15)) * DEF_SCORE) + (DRN_COUNT[i] * 16) + (COMPANIONS * 2);
+                default: break;
+            }
+        }
+        System.out.println("ATTACK: " + ATTACK);
+
+        result = ATTACK / 100;
+        return result;
+    }
 
 }
