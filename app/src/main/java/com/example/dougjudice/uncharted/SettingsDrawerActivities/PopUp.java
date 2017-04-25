@@ -57,6 +57,7 @@ public class PopUp extends Activity {
         Button closeButton = (Button) findViewById(R.id.close_activity);
         closeButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
+                setResult(RESULT_CANCELED);
                 finish();
             }
         });
@@ -101,7 +102,7 @@ public class PopUp extends Activity {
                             else
                                 System.out.println("Ret success");
 
-                            String[] friendNames = new String[friendList.length()];
+                            final String[] friendNames = new String[friendList.length()];
                             Integer[] itemID = new Integer[friendList.length()];
                             String[] facebookIds = new String[friendList.length()];
                             try{
@@ -124,7 +125,7 @@ public class PopUp extends Activity {
                                     @Override
                                     public void onItemClick(AdapterView<?> parent, View view, int position, long id){
                                         // convert position in grid to a name
-                                        String clickedName = adapter.getStringByPos(position);
+                                        final String clickedName = adapter.getStringByPos(position);
                                         final String facebookId = adapter.getFacebookIdByPos(position);
                                         final AlertDialog.Builder builder = new AlertDialog.Builder(PopUp.this);
 
@@ -139,6 +140,7 @@ public class PopUp extends Activity {
                                                         // TODO: send  DB, if more than 6 are in the group say no
                                                         Intent resultIntent = new Intent();
                                                         resultIntent.putExtra("friendFacebookId", facebookId);
+                                                        resultIntent.putExtra("friendName", clickedName);
                                                         setResult(RESULT_OK, resultIntent);
                                                         finish();
                                                     }

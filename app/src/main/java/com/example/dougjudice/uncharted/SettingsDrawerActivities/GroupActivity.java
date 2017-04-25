@@ -3,6 +3,7 @@ package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.design.widget.FloatingActionButton;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +13,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,25 +22,31 @@ import com.example.dougjudice.uncharted.GameElements.PlayerGroup;
 import com.example.dougjudice.uncharted.MapsActivity;
 import com.example.dougjudice.uncharted.R;
 import com.example.dougjudice.uncharted.UserProfile;
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphRequestBatch;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 
 import org.json.JSONArray;
-import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -53,6 +59,7 @@ public class GroupActivity extends AppCompatActivity {
     JSONArray friendList;
     FloatingActionButton fab;
     PlayerGroup group;
+    TextView tv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +72,7 @@ public class GroupActivity extends AppCompatActivity {
 
         fab = (FloatingActionButton) findViewById(R.id.friend_fab);
         lv = (ListView) findViewById(R.id.group_list);
+        tv = (TextView) findViewById(R.id.group_name);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,18 +105,21 @@ public class GroupActivity extends AppCompatActivity {
         System.out.println("requestCode: " + requestCode + "// resultCode: " + resultCode);
         if (resultCode == RESULT_OK) {
             String friendFacebookId = data.getExtras().getString("friendFacebookId");
+            String friendName = data.getExtras().getString("friendName");
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<PlayerGroup> result = executor.submit(new AddFriendToGroupCallable(friendFacebookId, group.groupId));
+            Future<UserProfile> result = executor.submit(new AddFriendToGroupCallable(friendFacebookId, group.groupId));
             try {
-                group = result.get();
-                updateGroupDisplayList(group);
-                Toast.makeText(GroupActivity.this, "Friend Added!", Toast.LENGTH_SHORT).show();
+                UserProfile friend = result.get();
+                friend.setName(friendName);
+                group.members.add(friend);
             } catch (Exception e) {
                 e.printStackTrace();
                 showError(e.getLocalizedMessage());
+                return;
             }
 
-            //updateGroupDisplayList(group); //TODO Why is this here?
+            updateGroupDisplayList(group);
+            Toast.makeText(GroupActivity.this, "Friend Added!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -124,14 +135,18 @@ public class GroupActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
                 showError(e.getLocalizedMessage());
+                return;
             }
         }
+
+
+        updateGroupDisplayList(group);
     }
 
     // Handle events from toolbar buttons
     public boolean onOptionsItemSelected(MenuItem item){
 
-        if(item.getItemId() == R.id.change_name){
+        if(item.getItemId() == R.id.change_name && UserProfile.getProfile().getGroupId() != null) {
             System.out.println("Clicked Bookmark Menu");
 
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -145,10 +160,46 @@ public class GroupActivity extends AppCompatActivity {
 
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    //TODO: Post update to server
-                    TextView tv = (TextView) findViewById(R.id.group_name);
-                    tv.setText(input.getText());
-                    System.out.println("Sent to DB");
+
+                    Resources res = getResources();
+                    String scheme = res.getString(R.string.login_server_protocol);
+                    String host = res.getString(R.string.login_server_host);
+                    String endpoint = res.getString(R.string.server_groups_endpoint);
+                    String groupNameSegment = res.getString(R.string.server_groups_name_segment);
+
+                    HttpUrl url = new HttpUrl.Builder()
+                            .scheme(scheme)
+                            .host(host)
+                            .port(res.getInteger(R.integer.login_server_port))
+                            .addPathSegments(endpoint)
+                            .addPathSegment(Integer.toString(UserProfile.getProfile().getGroupId()))
+                            .addPathSegment(groupNameSegment)
+                            .build();
+
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .post(RequestBody.create(MediaType.parse("text/plain; charset=utf-8"), input.getText().toString()))
+                            .build();
+
+                    OkHttpClient client = new OkHttpClient();
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (response.isSuccessful()) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        tv.setText(input.getText());
+                                    }
+                                });
+                            }
+                        }
+                    });
                 }
             });
 
@@ -195,21 +246,20 @@ public class GroupActivity extends AppCompatActivity {
 
         lv.setAdapter(adapter);
         System.out.println("SUCCESS_ADAPT");
-        return;
     }
 
-    private class AddFriendToGroupCallable implements Callable<PlayerGroup> {
+    private class AddFriendToGroupCallable implements Callable<UserProfile> {
 
         private String facebookId;
         private int groupId;
 
-        public AddFriendToGroupCallable(String facebookId, int groupId) {
+        AddFriendToGroupCallable(String facebookId, int groupId) {
             this.facebookId = facebookId;
             this.groupId = groupId;
         }
 
         @Override
-        public PlayerGroup call() throws Exception {
+        public UserProfile call() throws Exception {
             Resources res = getResources();
             String scheme = res.getString(R.string.login_server_protocol);
             String host = res.getString(R.string.login_server_host);
@@ -229,18 +279,21 @@ public class GroupActivity extends AppCompatActivity {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()) {
                 UserProfile user = UserProfile.deserialize(response.body().string());
-                return AddUserToGroup(user.getUserId(), groupId);
+                AddUserToGroup(user.getUserId(), groupId);
+                user.setGroupId(groupId);
+                return user;
             }
 
             throw new Exception("Could not get user by facebook ID. Response from server: " + response.code());
         }
 
-        private PlayerGroup AddUserToGroup(int userId, int groupId) throws Exception {
+        private void AddUserToGroup(int userId, int groupId) throws Exception {
 
             Resources res = getResources();
             String scheme = res.getString(R.string.login_server_protocol);
             String host = res.getString(R.string.login_server_host);
-            String endpoint = res.getString(R.string.server_group_members_endpoint);
+            String endpoint = res.getString(R.string.server_groups_endpoint);
+            String membersSegment = res.getString(R.string.server_groups_members_segment);
 
             HttpUrl url = new HttpUrl.Builder()
                     .scheme(scheme)
@@ -248,17 +301,16 @@ public class GroupActivity extends AppCompatActivity {
                     .port(res.getInteger(R.integer.login_server_port))
                     .addPathSegments(endpoint)
                     .addPathSegment(Integer.toString(groupId))
+                    .addPathSegment(membersSegment)
                     .addPathSegment(Integer.toString(userId))
                     .build();
 
-            Request request = new Request.Builder().url(url).post(null).build();
+            Request request = new Request.Builder().url(url).post(RequestBody.create(null, new byte[]{})).build();
             OkHttpClient client = new OkHttpClient();
             Response response = client.newCall(request).execute();
-            if (response.isSuccessful()) {
-                return PlayerGroup.deserialize(response.body().string());
+            if (!response.isSuccessful()) {
+                throw new Exception("Could not add user to group. Response from server: " + response.code());
             }
-
-            throw new Exception("Could not add user to group. Response from server: " + response.code());
         }
     }
 
@@ -300,7 +352,6 @@ public class GroupActivity extends AppCompatActivity {
         public GetGroupByGroupIdCallable(int groupId) {
             this.groupId = groupId;
         }
-
         @Override
         public PlayerGroup call() throws Exception {
             Resources res = getResources();
@@ -322,10 +373,56 @@ public class GroupActivity extends AppCompatActivity {
             Response response = client.newCall(request).execute();
 
             if (response.isSuccessful()) {
-                return PlayerGroup.deserialize(response.body().string());
+                PlayerGroup group = PlayerGroup.deserialize(response.body().string());
+                group.members = getUsersFacebookData(group.members);
+                return group;
             }
 
             throw new Exception("Could not get group. Response from server: " + response.code());
+        }
+
+        public List<UserProfile> getUsersFacebookData(List<UserProfile> users) throws Exception {
+            Collection<GraphRequest> requests = new ArrayList<>();
+
+            for (final UserProfile user : users) {
+                GraphRequest request = new GraphRequest(
+                        AccessToken.getCurrentAccessToken(),
+                        "/" + user.getFacebookId(),
+                        null,
+                        HttpMethod.GET,
+                        new GraphRequest.Callback() {
+                            public void onCompleted(GraphResponse response) {
+                                JSONObject userJson = response.getJSONObject();
+                                try {
+                                    user.setName(userJson.getString("name"));
+
+                                    String pictureEndpoint = userJson.getJSONObject("picture").getJSONObject("data").getString("url");
+                                    OkHttpClient client = new OkHttpClient();
+                                    Request request = new Request.Builder().url(pictureEndpoint).build();
+                                    Response pictureResponse = client.newCall(request).execute();
+
+                                    if (pictureResponse.isSuccessful()) {
+                                        Bitmap picture = BitmapFactory.decodeStream(pictureResponse.body().byteStream());
+                                        user.setPicture(picture);
+                                    } else {
+                                        throw new Exception("Error retrieving data from Facebook. Facebook server returned " + pictureResponse.code());
+                                    }
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                );
+                Bundle params = new Bundle();
+                params.putString("fields", "picture.type(large),name");
+                request.setParameters(params);
+                requests.add(request);
+            }
+
+            GraphRequestBatch batchRequest = new GraphRequestBatch(requests);
+            batchRequest.executeAndWait();
+            return users;
         }
     }
 

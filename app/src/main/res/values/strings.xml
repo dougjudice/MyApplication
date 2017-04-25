@@ -24,8 +24,8 @@
     <string name="login_server_connection_error">Problem authenticating with login server</string>
 
     <string name="server_new_group_endpoint">api/groups/new</string>
-    <string name="server_group_members_endpoint">api/groups/members</string>
-    <string name="server_user_by_facebook_id_endpoint">api/users/facebookId</string>
+    <string name="server_groups_endpoint">api/groups</string>
+    <string name="server_user_by_facebook_id_endpoint">api/users/fb</string>
 
     <string name="str_atv_places">Explore...</string>
     <string name="login_error">Login Error</string>
@@ -34,6 +34,8 @@
     <string name="group_error">Could not modify group</string>
     <string name="unable_to_talk_to_server">Could not talk to server</string>
     <string name="server_group_endpoint">api/groups</string>
+    <string name="server_groups_members_segment">members</string>
+    <string name="server_groups_name_segment">name</string>
 
 
     <!-- crowdclashlogin.ddns.net -->
