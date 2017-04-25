@@ -76,7 +76,6 @@
 
         <ImageView
             android:id="@+id/active_item_img"
-            android:src="@drawable/about_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"

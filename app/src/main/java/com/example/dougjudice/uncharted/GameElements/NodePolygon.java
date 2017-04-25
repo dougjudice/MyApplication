@@ -1,10 +1,25 @@
 package com.example.dougjudice.uncharted.GameElements;
 
 import android.animation.ValueAnimator;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.example.dougjudice.uncharted.R;
+import com.example.dougjudice.uncharted.UserProfile;
+import com.example.dougjudice.uncharted.Utility;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
 import java.util.ArrayList;
@@ -25,8 +40,6 @@ public class NodePolygon extends GamePolygon {
     ValueAnimator vm;
     Circle c;
 
-    //ArrayList<User> miningUsers; // TODO
-
     public NodePolygon(PolygonOptions po, ArrayList<ArrayList<Double>> coordinates, int polyID, String name, GoogleMap map){
         super();
         this.polygonOptions = po;
@@ -36,7 +49,7 @@ public class NodePolygon extends GamePolygon {
         this.polygon = map.addPolygon(po);
         this.resourceType = "Rareium";
 
-        this.activeMiners = 1;
+        this.activeMiners = 1; //TODO: change
         this.marker = null;
     }
 
@@ -69,34 +82,111 @@ public class NodePolygon extends GamePolygon {
     }
 
     public int getResourceCount(){
+
         return this.resourceCount;
     }
 
+    public int getActiveMiners(){
+        // TODO: From server
+        int miners = 1;
+        return miners;
+    }
+
+    /**
+     * Sends an integer to the server with how much of a resource this user mined over one server tick (or series of user ticks)
+     * Returns a status string
+     *
+     * @return
+     */
     public String depleteResourcesOnTick(){
-        int miners = this.activeMiners;
 
         System.out.println("Attempting to deplete resources");
         if(this.resourceCount <= 0){
             this.active = false;
             this.resourceCount = 0;
-            return "DEPLETED";
+            return "NO_NODE";
         }
         else{
+            int takeaway = (int) Math.floor(getMineralHardness() * computeMineRate());
+            // TODO: Send takeaway to server, deplete node by this amount, and return takeaway to user
 
-            int mineRate = (this.activeMiners); // TODO: Make more complicated
-            this.resourceCount = this.resourceCount - mineRate;
             System.out.println("Resources depleted! Remaining: " + this.resourceCount);
+
+            String serverResponse = "";
+            if(serverResponse.equals("SUCCESS")){
+                int[] loot = new int[] {0,0,0};
+                switch(this.resourceType){
+                    case "Commonite": loot[0] = takeaway;
+                    case "Rareium": loot[1] = takeaway;
+                    case "Legendgem": loot[2] = takeaway;
+                }
+                UserProfile.getProfile().updateUserMaterials(loot);
+            }
+
+
             this.marker.setSnippet(this.resourceType + ": x" +this.resourceCount); // Changes InfoWindow resource count to reflect actual sum
         }
         return "EXCEPTION";
     }
 
-    //TODO this jawn
-    public void postMiningStatusToServer(){}
+    public void addMarkerInfo(int miners, Integer imgSrc, GoogleMap mMap, Context c){
+        if(mMap == null)
+            return;
 
+        Marker m = this.getMarker();
+        m = mMap.addMarker(new MarkerOptions()
+                .position(Utility.centroid(this.getCoordinates()))
+                .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(imgSrc, miners, c))) // Need to update this and view_custom_marker
+                .anchor(0.5f, 0.5f)
+                .snippet(""+this.getResourceCount())
+                .title(this.getName()));
+        this.setMarker(m);
+    }
 
+    // Use to refresh the number of users here
+    public void updateMarkerInfo(int miners, Integer imgSrc, Context c){
+
+        this.marker.setIcon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(imgSrc, miners, c)));
+        this.marker.setSnippet(this.resourceType + ": x" + this.resourceCount);
+        //m.set
+    }
+
+    private Bitmap getMarkerBitmapFromView(int resId, int miners, Context c) {
+
+        View customMarkerView = ((LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_custom_marker, null);
+        TextView textView = (TextView) customMarkerView.findViewById(R.id.miner_count);
+
+        if(miners > 0 && miners <= 9){
+            textView.setText(""+miners);
+        }
+        else if(miners > 9){
+            textView.setText("9+");
+        }
+
+        ImageView markerImageView = (ImageView) customMarkerView.findViewById(R.id.profile_image);
+        markerImageView.setImageResource(resId);
+        customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
+        customMarkerView.buildDrawingCache();
+        Bitmap returnedBitmap = Bitmap.createBitmap(customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
+        Drawable drawable = customMarkerView.getBackground();
+        if (drawable != null)
+            drawable.draw(canvas);
+        customMarkerView.draw(canvas);
+        return returnedBitmap;
+    }
+
+    /**
+     * Algorithm to compute a user's mining rate when they are on a node
+     * Requires server to get the number of jammers in a node not in your group, and your group's items
+     * Returns double that has the mine rate as %
+     *
+     * @return
+     */
     public double computeMineRate(){
-        double result = 1.0;
 
         int ATTACK = 100; int DEFENSE = 100;
 
@@ -135,8 +225,16 @@ public class NodePolygon extends GamePolygon {
         }
         System.out.println("ATTACK: " + ATTACK);
 
-        result = ATTACK / 100;
-        return result;
+        return ATTACK / 100;
+    }
+
+    public int getMineralHardness(){
+        switch(this.resourceType){
+            case "Commonite": return 15;
+            case "Rareium": return 12;
+            case "Legendgem": return 10;
+            default: return 1; // should never happen
+        }
     }
 
 }

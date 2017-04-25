@@ -101,22 +101,36 @@ public class CraftingActivity extends AppCompatActivity {
 
                 // This is deciding whether you want to craft or not in a dialog box
                 final AlertDialog.Builder builder = new AlertDialog.Builder(CraftingActivity.this);
-                builder.setMessage("Are you sure you want to craft " + s + "?\n" + message);
+                builder.setMessage("Are you sure you want to craft " + s + "?\n\n" + message);
                 builder.setCancelable(true);
 
                 builder.setPositiveButton(
                         "Yes",
                         new DialogInterface.OnClickListener(){
                             public void onClick(DialogInterface dialog, int id){
-                                // TODO: check user inventory to see if they can craft selected item by using resources[]
+                                boolean craftable = true;
                                 for(int i = 0; i < reqResources.length; i++){
                                     if(reqResources[i] > resources[i]){
-                                        Toast.makeText(CraftingActivity.this, "You don't have the necessary resources to build this item!", Toast.LENGTH_SHORT).show();
-                                        dialog.cancel();
+                                        craftable = false;
+                                        break;
                                     }
                                 }
-                                Toast.makeText(CraftingActivity.this, "Item Crafted!", Toast.LENGTH_SHORT).show();
-                                dialog.cancel();
+                                if(craftable){
+                                    Toast.makeText(CraftingActivity.this, "Item Crafted!", Toast.LENGTH_SHORT).show();
+                                    for(int x = 0; x <reqResources.length; x++){
+                                        resources[x] -= reqResources[x];
+                                    }
+                                    // TODO: Post resources[] to server for user
+                                    int usr_id = UserProfile.getProfile().getUserId();
+
+                                    // ...
+
+                                    dialog.cancel();
+                                }
+                                else{
+                                    Toast.makeText(CraftingActivity.this, "You don't have the necessary resources to build this item!", Toast.LENGTH_SHORT).show();
+                                    dialog.cancel();
+                                }
                             }
                         });
                 builder.setNegativeButton(

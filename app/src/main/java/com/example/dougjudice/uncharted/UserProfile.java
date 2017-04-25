@@ -20,7 +20,6 @@ public class UserProfile implements Parcelable {
         public UserProfile createFromParcel(Parcel in) {
             return new UserProfile(in);
         }
-
         public UserProfile[] newArray(int size) {
             return new UserProfile[size];
         }
@@ -87,7 +86,15 @@ public class UserProfile implements Parcelable {
     private Bitmap picture;
     private String name;
 
-    private int[] userMaterials = {0,0,0}; // TODO: get from server
+    private int[] userMaterials = {0,0,0}; // TODO: Initialize from server
+
+    public void updateUserMaterials(int[] materials){
+        for(int i = 0; i < userMaterials.length; i++){
+            this.userMaterials[i] += materials[i];
+        }
+
+        //TODO: Post to server
+    }
 
     public synchronized int getUserId() {
         return userId;

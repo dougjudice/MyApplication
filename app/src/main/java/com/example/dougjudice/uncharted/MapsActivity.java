@@ -410,6 +410,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(mMap == null)
             return;
 
+
+        np.addMarkerInfo(1, R.drawable.rarium, mMap, this);
+        /*
         Marker m = np.getMarker();
         m = mMap.addMarker(new MarkerOptions()
                 .position(Utility.centroid(np.getCoordinates()))
@@ -418,6 +421,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .snippet(""+np.getResourceCount())
                 .title(np.getName()));
         np.setMarker(m);
+        */
     }
 
     // Utility Function for updating Coordinates
@@ -629,34 +633,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Context c = getApplicationContext();
 
         if (id == R.id.nav_group) {
-            // Start Group Activity
-            //Toast t = Toast.makeText(c, "Opening Group Activity", Toast.LENGTH_SHORT );
-            //t.show();
             startActivity(new Intent(this, GroupActivity.class));
             //setContentView(R.layout.activity_group);
         } else if (id == R.id.nav_gallery) {
-            //Toast t = Toast.makeText(c, "Opening My Resources Activity", Toast.LENGTH_SHORT );
-            //t.show();
             startActivity(new Intent(this, ResourceActivity.class));
             //setContentView(R.layout.activity_myresource);
 
         }
         else if (id == R.id.nav_manage) {
-            //Toast t = Toast.makeText(c, "Opening Crafting Activity", Toast.LENGTH_SHORT );
-            //t.show();
             startActivity(new Intent(this, CraftingActivity.class));
             //setContentView(R.layout.activity_craft);
 
         } else if (id == R.id.nav_share) {
-            //Toast t = Toast.makeText(c, "Opening Leaderboard Activity", Toast.LENGTH_SHORT );
-            //t.show();
             startActivity(new Intent(this, LeaderboardActivity.class));
 
         } else if (id == R.id.nav_send) {
             Toast t = Toast.makeText(c, "Opening About Activity", Toast.LENGTH_SHORT );
             t.show();
-            //
-            // setContentView(R.layout.activity_about); TODO: Get rid of these everywhere?
             startActivity(new Intent(this, AboutActivity.class));
         } else if (id == R.id.logout){
 
@@ -694,27 +687,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return false;
-    }
-
-
-    // Marker Animation Functions
-    private Bitmap getMarkerBitmapFromView(int resId) {
-
-        View customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_custom_marker, null);
-        ImageView markerImageView = (ImageView) customMarkerView.findViewById(R.id.profile_image);
-        markerImageView.setImageResource(resId);
-        customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
-        customMarkerView.buildDrawingCache();
-        Bitmap returnedBitmap = Bitmap.createBitmap(customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(returnedBitmap);
-        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
-        Drawable drawable = customMarkerView.getBackground();
-        if (drawable != null)
-            drawable.draw(canvas);
-        customMarkerView.draw(canvas);
-        return returnedBitmap;
     }
 
     private void addPulsatingEffect(LatLng userLatlng, NodePolygon np){
@@ -774,18 +746,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SharedPreferences.Editor editor = sp.edit();
 
         //TODO: Testing, remove this later when item expiration info is moved to server
-        if(counter > 10){
+        if(counter > 20){
             editor.putBoolean("itemInUse",false);
             editor.putInt("itemReturnId",-1);
             editor.commit();
-
         }
 
         boolean itemInUse = sp.getBoolean("itemInUse",false);
 
         System.out.println("Counter : " + counter + " itemInUse =  " + itemInUse);
         if(itemInUse){
-            int itemId = sp.getInt("itemReturnId",-1);
+            final int itemId = sp.getInt("itemReturnId",-1);
             if(itemId < 0){
                 System.out.println("ITEM_NOT_FOUND_ERROR");
                 return;
@@ -794,6 +765,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     R.anim.fade_in);
             inUseItem.setImageResource(Utility.getItemImageSource(itemId)); // change item pic
             inUseItem.setAnimation(animFadeIn);
+
+            inUseItem.setClickable(true);
+            inUseItem.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(MapsActivity.this, Utility.getItemNameById(itemId) + " has 10 seconds remaining.", Toast.LENGTH_SHORT).show(); // TODO: Show actual time remaining
+                }
+            });
+
             itemFaded = false;
             canExpire = true;
         }
@@ -802,6 +782,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     R.anim.fade_out);
             inUseItem.startAnimation(animFadeOut);
             itemFaded = true;
+            inUseItem.setClickable(false);
             if(canExpire) {
                 Toast.makeText(MapsActivity.this, "Item Expired!", Toast.LENGTH_SHORT).show();
                 canExpire = false;

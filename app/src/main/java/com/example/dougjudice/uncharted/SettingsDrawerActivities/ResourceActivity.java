@@ -51,7 +51,7 @@ public class ResourceActivity extends AppCompatActivity {
         //LinearLayout mContainer = inflater.inflate(R.layout.activity_myresource, null);
         lv = (ListView) findViewById(R.id.my_resources);
 
-        //TODO: Get information from server about user's actual resources
+        //TODO: Get information from server about user's actual inventory
 
         ArrayList<String> inventory = new ArrayList<>();
 
@@ -86,12 +86,11 @@ public class ResourceActivity extends AppCompatActivity {
                 System.out.println("item clicked");
                 String selection = lv.getItemAtPosition(position).toString();
 
-                // TODO: Account for all items later with a switch statement
-                if(selection.equals("Mineral Scanner")){
+                if(!selection.equals("Commonite") || !selection.equals("Rareium") || !selection.equals("Legendgem")) {
                     useItem(selection);
                 }
                 else{
-                    Toast.makeText(ResourceActivity.this, "Cannot use this item!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ResourceActivity.this, "Cannot use a raw item!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -123,6 +122,7 @@ public class ResourceActivity extends AppCompatActivity {
                 new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int id){
                         Toast.makeText(ResourceActivity.this, "Item Used!", Toast.LENGTH_SHORT).show();
+                        // TODO: Post item usage to server
                         itemReturnId = 0;
 
                         SharedPreferences.Editor editor = sp.edit();

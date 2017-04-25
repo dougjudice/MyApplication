@@ -126,9 +126,9 @@ public class PopUp extends Activity {
                                         // convert position in grid to a name
                                         String clickedName = adapter.getStringByPos(position);
                                         final String facebookId = adapter.getFacebookIdByPos(position);
-                                        // This is deciding whether you want to craft or not in a dialog box
                                         final AlertDialog.Builder builder = new AlertDialog.Builder(PopUp.this);
-                                        builder.setMessage("Are you sure you want to add " + clickedName + " " + group.name);
+
+                                        builder.setMessage("Are you sure you want to add " + clickedName + " " + " to " + group.name + "?");
                                         builder.setCancelable(true);
 
                                         builder.setPositiveButton(

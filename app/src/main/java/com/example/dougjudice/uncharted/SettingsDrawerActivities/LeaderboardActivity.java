@@ -35,4 +35,11 @@ public class LeaderboardActivity extends AppCompatActivity {
         finish();
         return true;
     }
+
+    public int[] getScore(){
+
+        // TODO: Go through user's group by their groupID, get all of their resource counts
+
+        return null;
+    }
 }

@@ -35,8 +35,14 @@ public class IntroActivity extends AppIntro {
 
         addSlide(AppIntroFragment.newInstance("Welcome to CrowdForce!", "In this short tutorial, you'll learn the basics of the game and how to climb the leaderboards...",
                 R.drawable.gemlogo1, Color.parseColor("#08ffd6")));
-        addSlide(AppIntroFragment.newInstance("How to Get Gems", "'Gems' are the resource you'll be finding in this game. They appear at nodes at any of your favorite Rutgers hangouts on a special scheduling system.",
-                R.drawable.gemlogo1, Color.parseColor("#E63C35")));
+        addSlide(AppIntroFragment.newInstance("How to Get Gems", "'Gems' are the resource you'll be finding in this game. They appear randomly at stores with Nodes. Nodes show the number of other people mining, and clicking them will show how many resources are left.",
+                R.drawable.tut1, Color.parseColor("#E63C35")));
+        addSlide(AppIntroFragment.newInstance("Start your Group", "To make things easier, you can start a group with your Facebook friends. Just add them under the 'My Group' tab. Friends won't appear unless they also have CrowdForce installed!",
+                R.drawable.user_group, Color.parseColor("#42f468")));
+        addSlide(AppIntroFragment.newInstance("Craft Items", "With gems, you can craft items. Use items to get an edge on other groups competing for the same resources. Most items are more effective if you're out with your group!",
+                R.drawable.mineral_scanner_rare, Color.parseColor("#f4419b")));
+        addSlide(AppIntroFragment.newInstance("Climb the Leaderboard", "All groups are ranked by how many gems they have. Commonite is worth 1 point, Rareium worth 3, and Legendgem worth 5. There will be a prize for the top group at the end of our testing!",
+                R.drawable.legendgem, Color.parseColor("#5041f4")));
 
         // OPTIONAL METHODS
         // Override bar/separator color.
