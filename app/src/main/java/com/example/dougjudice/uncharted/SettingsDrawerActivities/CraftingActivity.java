@@ -3,6 +3,7 @@ package com.example.dougjudice.uncharted.SettingsDrawerActivities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +40,7 @@ Crafted items are then stored in the User's inventory
 public class CraftingActivity extends AppCompatActivity {
 
     ListView lv = null;
+    SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,10 +101,14 @@ public class CraftingActivity extends AppCompatActivity {
                 String message = Utility.getItemMessageById(position);
                 final int[] reqResources = Utility.getItemResourceReq(position);
 
+                final int pos = position;
+
                 // This is deciding whether you want to craft or not in a dialog box
                 final AlertDialog.Builder builder = new AlertDialog.Builder(CraftingActivity.this);
                 builder.setMessage("Are you sure you want to craft " + s + "?\n\n" + message);
                 builder.setCancelable(true);
+
+                sp = getSharedPreferences("itemExp", Context.MODE_PRIVATE);
 
                 builder.setPositiveButton(
                         "Yes",
@@ -122,6 +128,12 @@ public class CraftingActivity extends AppCompatActivity {
                                     }
                                     // TODO: Post resources[] to server for user
                                     int usr_id = UserProfile.getProfile().getUserId();
+
+
+
+                                    SharedPreferences.Editor editor = sp.edit();
+
+
 
                                     // ...
 

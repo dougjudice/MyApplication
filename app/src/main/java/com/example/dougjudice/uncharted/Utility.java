@@ -181,6 +181,8 @@ public final class Utility {
             default: return "ITEM_NOT_FOUND";
         }
     }
+
+
     public static String getItemMessageById(int id){
         switch(id){
             case 0: return "The Common Mineral Scanner will let you see Commonite Nodes in the world before they're about to become active. This will last for 6 hours.";

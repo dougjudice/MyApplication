@@ -498,6 +498,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     updateUIHard();
                     locationSet = true;
                 }
+
+                // See if item is expired
+                Long time = System.currentTimeMillis();
+                SharedPreferences sp = getSharedPreferences("ItemPref", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+
+                Long expTime = sp.getLong("itemExpTime", 0L);
+                if(time >= expTime){
+                    editor.putBoolean("itemInUse",false);
+                    editor.putInt("itemReturnId",-1);
+                    editor.commit();
+                }
+
                 //System.out.println("Checking system");
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
                 System.out.println("PULSING");
@@ -746,11 +759,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SharedPreferences.Editor editor = sp.edit();
 
         //TODO: Testing, remove this later when item expiration info is moved to server
+        /*
         if(counter > 20){
             editor.putBoolean("itemInUse",false);
             editor.putInt("itemReturnId",-1);
             editor.commit();
         }
+        */
 
         boolean itemInUse = sp.getBoolean("itemInUse",false);
 
@@ -766,11 +781,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             inUseItem.setImageResource(Utility.getItemImageSource(itemId)); // change item pic
             inUseItem.setAnimation(animFadeIn);
 
+            Long l = sp.getLong("itemExpTime",0L);
+            Long time = System.currentTimeMillis();
+            final int sec = (int) (l - time) / 1000;
+
             inUseItem.setClickable(true);
             inUseItem.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(MapsActivity.this, Utility.getItemNameById(itemId) + " has 10 seconds remaining.", Toast.LENGTH_SHORT).show(); // TODO: Show actual time remaining
+                    Toast.makeText(MapsActivity.this, Utility.getItemNameById(itemId) + " has " + sec + " seconds remaining.", Toast.LENGTH_SHORT).show();
                 }
             });
 

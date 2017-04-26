@@ -139,8 +139,7 @@ public class GroupActivity extends AppCompatActivity {
             }
         }
 
-
-        updateGroupDisplayList(group);
+        if(group != null)  updateGroupDisplayList(group);
     }
 
     // Handle events from toolbar buttons

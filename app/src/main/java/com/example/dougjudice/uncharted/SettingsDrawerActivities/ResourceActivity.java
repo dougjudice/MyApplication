@@ -117,6 +117,14 @@ public class ResourceActivity extends AppCompatActivity {
         builder.setMessage("Are you sure you want to use " + item + "?");
         builder.setCancelable(true);
 
+        boolean six_hour = false;
+
+        if(item.contains("Scanner")){
+            six_hour = true;
+        }
+
+        final boolean hour = six_hour;
+
         builder.setPositiveButton(
                 "Yes",
                 new DialogInterface.OnClickListener(){
@@ -129,6 +137,20 @@ public class ResourceActivity extends AppCompatActivity {
 
                         editor.putBoolean("itemInUse",true);
                         editor.putInt("itemReturnId",itemReturnId);
+
+
+                        Long time = System.currentTimeMillis();
+
+                        // Find expiration time
+                        if(hour){
+                            time += 15000;
+                            System.out.println("Adding 15 seconds to item");
+                        }
+                        else if(!hour){
+                            time += 3600000;
+                        }
+
+                        editor.putLong("itemExpTime", time);
                         editor.commit();
                         System.out.println("Item placed successfully : " + sp.getBoolean("itemInUse",false));
 
