@@ -15,6 +15,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -136,6 +138,22 @@ public final class Utility {
             e.printStackTrace();
         }
     }
+    // Overloaded function that stores inventory
+    public static void storeFile(String name, ArrayList<Item> i, Context c){
+        FileOutputStream fos;
+        try{
+            fos = c.openFileOutput(name, Context.MODE_PRIVATE);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(i);
+            oos.close();
+            fos.close();
+            System.out.println("Inventory store success");
+        } catch(FileNotFoundException e){
+            e.printStackTrace();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+    }
 
     // Use this function to retreive a file from the device's internal memory, in string format
     public static String fetchFile(String name, Context c){
@@ -150,12 +168,33 @@ public final class Utility {
             while((line = bufferedReader.readLine()) != null){
                 sb.append(line);
             }
+            fis.close();
         } catch( FileNotFoundException e){
             e.printStackTrace();
         } catch( IOException e){
             e.printStackTrace();
         }
         return sb.toString();
+        // null return value indicates some type of error
+    }
+    public static ArrayList<Item> fetchInventoryFile(String name, Context c){
+        FileInputStream fis;
+        StringBuilder sb = null;
+        ArrayList<Item> result = null;
+        try{
+            fis = c.openFileInput(name);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            result = (ArrayList<Item>) ois.readObject();
+            ois.close();
+            fis.close();
+        } catch( FileNotFoundException e){
+            e.printStackTrace();
+        } catch( IOException e){
+            e.printStackTrace();
+        } catch (ClassNotFoundException e){
+            e.printStackTrace();
+        }
+        return result;
         // null return value indicates some type of error
     }
 
@@ -179,6 +218,27 @@ public final class Utility {
             case 21: return "Rareium";
             case 22: return "Legendgem";
             default: return "ITEM_NOT_FOUND";
+        }
+    }
+    public static int getItemIdByName(String s){
+        switch(s){
+            case "Common Mineral Scanner": return 0;
+            case "Rare Mineral Scanner": return 1;
+            case "Legendary Mineral Scanner": return 2;
+            case "Common Drone": return 3;
+            case "Rare Drone": return 4;
+            case "Legendary Drone": return 5;
+            case "Common Jammer": return 6;
+            case "Rare Jammer": return 7;
+            case "Legendary Jammer": return 8;
+            case "Common Barrier": return 9;
+            case "Rare Barrier": return 10;
+            case "Legendary Barrier": return 11;
+            case "Commonite": return 20;
+            case "Rareium": return 21;
+            case "Legendgem": return 22;
+
+            default: return -1;
         }
     }
 
@@ -222,19 +282,18 @@ public final class Utility {
     }
     public static Integer getItemImageSource(int id){
         switch(id){
-            case 0: return  R.drawable.mineral_scanner_common;
-            case 1: return R.drawable.mineral_scanner_common;
-            case 2: return R.drawable.mineral_scanner_rare;
-            case 3: return       R.drawable.mineral_scanner_legendary;
-            case 4: return        R.drawable.commonite_drone;
-            case 5: return        R.drawable.rareium_drone;
-            case 6: return        R.drawable.legendgem_drone;
-            case 7: return        R.drawable.jammer_common;
-            case 8: return        R.drawable.jammer_rare;
-            case 9: return        R.drawable.jammer_legendary;
-            case 10: return        R.drawable.barrier_common;
-            case 11: return        R.drawable.barrier_rare;
-            case 12: return        R.drawable.barrier_legendary;
+            case 0: return R.drawable.mineral_scanner_common;
+            case 1: return R.drawable.mineral_scanner_rare;
+            case 2: return       R.drawable.mineral_scanner_legendary;
+            case 3: return        R.drawable.commonite_drone;
+            case 4: return        R.drawable.rareium_drone;
+            case 5: return        R.drawable.legendgem_drone;
+            case 6: return        R.drawable.jammer_common;
+            case 7: return        R.drawable.jammer_rare;
+            case 8: return        R.drawable.jammer_legendary;
+            case 9: return        R.drawable.barrier_common;
+            case 10: return        R.drawable.barrier_rare;
+            case 11: return        R.drawable.barrier_legendary;
             case 20: return R.drawable.commonite;
             case 21: return R.drawable.rarium;
             case 22: return R.drawable.legendgem;

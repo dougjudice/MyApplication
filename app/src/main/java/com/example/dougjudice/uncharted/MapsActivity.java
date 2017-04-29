@@ -43,6 +43,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dougjudice.uncharted.DataProcessing.GeoJsonUtil;
+import com.example.dougjudice.uncharted.GameElements.Item;
 import com.example.dougjudice.uncharted.GameElements.NodePolygon;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.AboutActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.CraftingActivity;
@@ -159,6 +160,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mTitle = "Test";
         mDrawerTitle = "Test 2";
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        ArrayList<Item> inventory = Utility.fetchInventoryFile("USR_INV",MapsActivity.this);
+        if(inventory == null){
+            inventory = new ArrayList<Item>();
+        }
+        if(inventory.isEmpty()){
+            inventory.add(new Item("Commonite",999));
+            inventory.add(new Item("Rareium",999));
+            inventory.add(new Item("Legendgem",999));
+            Utility.storeFile("USR_INV", inventory, MapsActivity.this);
+        }
 
         // Sets up NavigationView (the actual drawer)
         NavigationView navView = (NavigationView) findViewById(R.id.left_drawer);

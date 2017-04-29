@@ -16,6 +16,7 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.dougjudice.uncharted.GameElements.Item;
 import com.example.dougjudice.uncharted.MapsActivity;
 import com.example.dougjudice.uncharted.R;
 import com.example.dougjudice.uncharted.UserProfile;
@@ -56,7 +57,12 @@ public class CraftingActivity extends AppCompatActivity {
         lv = (ListView) findViewById(R.id.craft_bar);
 
         //TODO: Get information from server about user's actual resources here
-        final int[] resources = UserProfile.getProfile().getUserMaterials();
+        ArrayList<Item> inventory = Utility.fetchInventoryFile("USR_INV",CraftingActivity.this);
+        final int[] resources = new int[] {0,0,0};
+        for(int i = 0; i < 3; i++){
+            resources[i] = inventory.get(i).getCount();
+            // Fill this list with first three resources
+        }
 
         String[] items = {
                 "Common Mineral Scanner",
@@ -97,8 +103,8 @@ public class CraftingActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id){
                 // convert position in grid to a name
-                String s = Utility.getItemNameById(position);
-                String message = Utility.getItemMessageById(position);
+                final String s = Utility.getItemNameById(position);
+                final String message = Utility.getItemMessageById(position);
                 final int[] reqResources = Utility.getItemResourceReq(position);
 
                 final int pos = position;
@@ -123,19 +129,40 @@ public class CraftingActivity extends AppCompatActivity {
                                 }
                                 if(craftable){
                                     Toast.makeText(CraftingActivity.this, "Item Crafted!", Toast.LENGTH_SHORT).show();
-                                    for(int x = 0; x <reqResources.length; x++){
-                                        resources[x] -= reqResources[x];
-                                    }
-                                    // TODO: Post resources[] to server for user
-                                    int usr_id = UserProfile.getProfile().getUserId();
-
 
 
                                     SharedPreferences.Editor editor = sp.edit();
+                                    boolean found = false;
 
+                                    ArrayList<Item> inventory = Utility.fetchInventoryFile("USR_INV",CraftingActivity.this);
 
-
-                                    // ...
+                                    for(int x = 0; x <reqResources.length; x++){
+                                        int amt = inventory.get(x).getCount() - reqResources[x];
+                                        inventory.get(x).setCount(amt);
+                                    }
+                                    if(inventory!=null){
+                                        for(int i = 0; i < inventory.size(); i++){
+                                            String name = inventory.get(i).getName();
+                                            if(s.equals(name)){
+                                                // increment inventory count
+                                                int n = inventory.get(i).getCount();
+                                                n = n + 1;
+                                                inventory.get(i).setCount(n);
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+                                        if(!found){
+                                            // add new item
+                                            Item i = new Item(s, 1);
+                                            inventory.add(i);
+                                        }
+                                    }
+                                    else{
+                                        Item i = new Item(s, 1);
+                                        inventory.add(i);
+                                    }
+                                    Utility.storeFile("USR_INV", inventory, CraftingActivity.this);
 
                                     dialog.cancel();
                                 }

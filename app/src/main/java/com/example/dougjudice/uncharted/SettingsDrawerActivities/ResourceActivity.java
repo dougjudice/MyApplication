@@ -17,8 +17,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.dougjudice.uncharted.GameElements.Item;
 import com.example.dougjudice.uncharted.MapsActivity;
 import com.example.dougjudice.uncharted.R;
+import com.example.dougjudice.uncharted.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,12 +55,20 @@ public class ResourceActivity extends AppCompatActivity {
 
         //TODO: Get information from server about user's actual inventory
 
-        ArrayList<String> inventory = new ArrayList<>();
+        ArrayList<Item> Inventory = Utility.fetchInventoryFile("USR_INV",this);
 
-        for(int i = 0; i < inventory.size(); i++){
-            // TODO: Load inventory
+
+        String[] items = new String[Inventory.size()];
+        Integer[] itemID = new Integer[Inventory.size()];
+        int[] count = new int[Inventory.size()];
+
+        for(int i = 0; i < Inventory.size(); i++){
+            items[i] = Inventory.get(i).getName();
+            itemID[i] = Utility.getItemImageSource(Utility.getItemIdByName(Inventory.get(i).getName()));
+            count[i] = Inventory.get(i).getCount();
         }
 
+        /*
         String[] items = {
                 // Utility.getItemNameById(inventory.get(i))...
                 "Rareium",
@@ -72,11 +82,15 @@ public class ResourceActivity extends AppCompatActivity {
                 R.drawable.legendgem,
                 R.drawable.mineral_scanner_common
         };
+        */
 
         // Sets up custom format for item  selection
         CustomList adapter = new CustomList(ResourceActivity.this, items, itemID, null);
 
         lv.setAdapter(adapter);
+
+        final int[] fcount = count;
+        final String[] fnames = items;
 
         // Set up action for click within the listview
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -86,11 +100,13 @@ public class ResourceActivity extends AppCompatActivity {
                 System.out.println("item clicked");
                 String selection = lv.getItemAtPosition(position).toString();
 
-                if(!selection.equals("Commonite") || !selection.equals("Rareium") || !selection.equals("Legendgem")) {
+                System.out.println(selection + " is picked");
+
+                if(!selection.equals("Commonite") && !selection.equals("Rareium") && !selection.equals("Legendgem")) {
                     useItem(selection);
                 }
                 else{
-                    Toast.makeText(ResourceActivity.this, "Cannot use a raw item!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ResourceActivity.this, "You have " + fcount[position] + " " + fnames[position] + " left!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -124,16 +140,37 @@ public class ResourceActivity extends AppCompatActivity {
         }
 
         final boolean hour = six_hour;
+        final Context c = this;
+        final String s = item;
 
         builder.setPositiveButton(
                 "Yes",
                 new DialogInterface.OnClickListener(){
                     public void onClick(DialogInterface dialog, int id){
                         Toast.makeText(ResourceActivity.this, "Item Used!", Toast.LENGTH_SHORT).show();
-                        // TODO: Post item usage to server
-                        itemReturnId = 0;
+
+                        itemReturnId = Utility.getItemIdByName(s);
 
                         SharedPreferences.Editor editor = sp.edit();
+
+                        ArrayList<Item> inv = Utility.fetchInventoryFile("USR_INV",c);
+
+                        for(int i = 0; i < inv.size(); i++){
+                            if(inv.get(i).getName().equals(s)){
+                                int x = inv.get(i).getCount();
+                                x--;
+                                inv.get(i).setCount(x);
+                                System.out.println("Count: " + inv.get(i).getCount());
+                                // check if item needs to be removed
+                                if(inv.get(i).getCount() <= 0){
+                                    inv.remove(inv.get(i));
+                                    System.out.println("Item removed");
+                                }
+                                inv = purgeInventory(inv);
+                            }
+                        }
+
+                        Utility.storeFile("USR_INV",inv, c);
 
                         editor.putBoolean("itemInUse",true);
                         editor.putInt("itemReturnId",itemReturnId);
@@ -166,5 +203,20 @@ public class ResourceActivity extends AppCompatActivity {
                 });
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public ArrayList<Item> purgeInventory(ArrayList<Item> l){
+        for(int i = 0; i < l.size(); i++){
+            String s = l.get(i).getName();
+            if(s.equals("Commonite") || s.equals("Rareium") || s.equals("Legendgem")) {
+                continue;
+            }
+            else{
+                if(l.get(i).getCount() <= 0){
+                    l.remove(l.get(i));
+                }
+            }
+        }
+        return l;
     }
 }
