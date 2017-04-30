@@ -418,6 +418,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
+
+    // Creates the UI custom marker drawn atop google maps
     private void addCustomMarker(NodePolygon np){
         if(mMap == null)
             return;
@@ -501,7 +503,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             // Use this to check if User is within a polygon. checkAllIntersections returns a String which can act as a key to get the appropriate NodePolygon
             if(mLastLocation == null){
-                System.out.println("ERROR: NO USER LOCATION");
+                System.out.println("EXCEPTION: NO USER LOCATION");
                 return;
             }
             //locationSet = true;
@@ -547,7 +549,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         inNode = true;
                     }
                     overlap.depleteResourcesOnTick();
-                    //System.out.println(" ### REMAINING RESOURCES IN " + state + " : " + overlap.getResourceCount());
                 }
                 else { // User not in any polygon
                     System.out.println("User not in any polygon");
@@ -557,9 +558,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         Animation animSlideUp = AnimationUtils.loadAnimation(getApplicationContext(),
                                 R.anim.slide_up);
-                        //resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
-                        //resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.transparent));
-                        //resourceToolTip.setText("");
+
                         resourceToolTip.startAnimation(animSlideUp);
                         inNode = false;
                         // 40.5014
@@ -659,15 +658,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (id == R.id.nav_group) {
             startActivity(new Intent(this, GroupActivity.class));
-            //setContentView(R.layout.activity_group);
         } else if (id == R.id.nav_gallery) {
             startActivity(new Intent(this, ResourceActivity.class));
-            //setContentView(R.layout.activity_myresource);
-
         }
         else if (id == R.id.nav_manage) {
             startActivity(new Intent(this, CraftingActivity.class));
-            //setContentView(R.layout.activity_craft);
 
         } else if (id == R.id.nav_share) {
             startActivity(new Intent(this, LeaderboardActivity.class));
@@ -690,7 +685,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             LoginManager.getInstance().logOut();
 
-                            //stopService(new Intent(this, PulseService.class));
                             startActivity(new Intent(getBaseContext(), MainActivity.class));
                             finish();
                             dialog.cancel();
@@ -705,15 +699,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     });
             AlertDialog alert = builder.create();
             alert.show();
-
-            //setContentView(R.layout.activity_main);
         }
 
-        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        // Ensures that drawer has correct settings
         mDrawerLayout.closeDrawer(GravityCompat.START);
         return false;
     }
 
+    // TODO: change color of pulsating effect based on resource type
+    // Function draws circles over active nodes in game
     private void addPulsatingEffect(LatLng userLatlng, NodePolygon np){
         if(np.getVm() != null){
             np.getVm().cancel();
@@ -769,15 +763,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void updateItem(){
         SharedPreferences sp = getSharedPreferences("ItemPref", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-
-        //TODO: Testing, remove this later when item expiration info is moved to server
-        /*
-        if(counter > 20){
-            editor.putBoolean("itemInUse",false);
-            editor.putInt("itemReturnId",-1);
-            editor.commit();
-        }
-        */
 
         boolean itemInUse = sp.getBoolean("itemInUse",false);
 

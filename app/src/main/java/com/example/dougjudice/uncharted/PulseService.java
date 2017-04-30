@@ -14,14 +14,17 @@ import java.util.TimerTask;
 
 /**
  * Created by dougjudice on 4/9/17.
+ *
+ * The Pulse Service is a special thread running async the entire lifecycle of the app that allows for seamless server integration
+ * Every 5 seconds, the Pulse Service is called with a embedded timer that executes a series of functions defined
+ * within the 'ServiceCallback' interface.
+ *
  */
 
 public class PulseService extends Service {
 
     // Pulse time
-    public static final long NOTIFY_INTERVAL = 5 * 1000; // 5 seconds, increase later TODO
-    public static final String BROADCAST_ACTION = "com.example.dougjudice.uncharted.PulseService";
-    Intent broadcastIntent;
+    public static final long NOTIFY_INTERVAL = 5 * 1000; // 5 seconds, increase later
 
     public IBinder mBinder = new LocalBinder();
     private ServiceCallback serviceCallbacks;
@@ -109,7 +112,7 @@ public class PulseService extends Service {
         mTimer = null;
     }
 
-    // When a user logs out, for some reason, this guy has to be called in onServiceConnected within MapsActivity to make sure that the timer starts again properly
+    // When a user logs out, for some reason, this thing has to be called in onServiceConnected within MapsActivity to make sure that the timer starts again properly
     public void forceStartTimer(){
         if(mTimer != null){
             return; // Timer may have already been started, would cause exception if you didn't return

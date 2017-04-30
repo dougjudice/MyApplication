@@ -190,6 +190,7 @@ public class ResourceActivity extends AppCompatActivity {
                         editor.putLong("itemExpTime", time);
                         editor.commit();
                         System.out.println("Item placed successfully : " + sp.getBoolean("itemInUse",false));
+                        refreshListView();
 
                         dialog.cancel();
                     }
@@ -218,5 +219,26 @@ public class ResourceActivity extends AppCompatActivity {
             }
         }
         return l;
+    }
+
+    public void refreshListView(){
+
+        ArrayList<Item> Inventory = Utility.fetchInventoryFile("USR_INV",this);
+
+
+        String[] items = new String[Inventory.size()];
+        Integer[] itemID = new Integer[Inventory.size()];
+        int[] count = new int[Inventory.size()];
+
+        for(int i = 0; i < Inventory.size(); i++){
+            items[i] = Inventory.get(i).getName();
+            itemID[i] = Utility.getItemImageSource(Utility.getItemIdByName(Inventory.get(i).getName()));
+            count[i] = Inventory.get(i).getCount();
+        }
+
+        // Sets up custom format for item  selection
+        CustomList adapter = new CustomList(ResourceActivity.this, items, itemID, null);
+
+        lv.setAdapter(adapter);
     }
 }
