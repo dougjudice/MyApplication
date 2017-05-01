@@ -35,6 +35,7 @@ public class NodePolygon extends GamePolygon {
     String resourceType;// Denotes the name of the resource within the node. 'NONE' when there is none.
     int activeMiners;   // Denotes number of users mining a node
     int remainingTicks; // Denotes how many game-ticks are left before resource disappears
+    int take;
 
     Marker marker;
     ValueAnimator vm;
@@ -47,10 +48,24 @@ public class NodePolygon extends GamePolygon {
         this.polyID = polyID;
         this.name = name;
         this.polygon = map.addPolygon(po);
-        this.resourceType = "Rareium";
+        this.resourceType = generateRandom();
 
         this.activeMiners = 1; //TODO: change
         this.marker = null;
+    }
+
+    public String generateRandom(){
+        double r = Math.random();
+        System.out.println("r: " + r);
+        if(r >= 0 && r <= .2){
+            return "Legendgem";
+        }
+        else if(r > .2 && r <= .55){
+            return "Rareium";
+        }
+        else{
+            return "Commonite";
+        }
     }
 
     public ValueAnimator getVm(){
@@ -86,10 +101,17 @@ public class NodePolygon extends GamePolygon {
         return this.resourceCount;
     }
 
+    public String getResourceType(){
+        return this.resourceType;
+    }
+
     public int getActiveMiners(){
         // TODO: From server
         int miners = 1;
         return miners;
+    }
+    public int getTake(){
+        return this.take;
     }
 
     /**
@@ -108,9 +130,11 @@ public class NodePolygon extends GamePolygon {
         }
         else{
             int takeaway = (int) Math.floor(getMineralHardness() * computeMineRate());
+            this.take = takeaway;
             // TODO: Send takeaway to server, deplete node by this amount, and return takeaway to user
 
             System.out.println("Resources depleted! Remaining: " + this.resourceCount);
+            this.resourceCount = this.resourceCount -takeaway;
 
             String serverResponse = "";
             if(serverResponse.equals("SUCCESS")){
@@ -122,7 +146,6 @@ public class NodePolygon extends GamePolygon {
                 }
                 UserProfile.getProfile().updateUserMaterials(loot);
             }
-
 
             this.marker.setSnippet(this.resourceType + ": x" +this.resourceCount); // Changes InfoWindow resource count to reflect actual sum
         }
@@ -138,7 +161,7 @@ public class NodePolygon extends GamePolygon {
                 .position(Utility.centroid(this.getCoordinates()))
                 .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(imgSrc, miners, c))) // Need to update this and view_custom_marker
                 .anchor(0.5f, 0.5f)
-                .snippet(""+this.getResourceCount())
+                .snippet(""+getResourceType()+ ": x"+getResourceCount())
                 .title(this.getName()));
         this.setMarker(m);
     }
@@ -211,7 +234,6 @@ public class NodePolygon extends GamePolygon {
                 default: break;
             }
         }
-        System.out.println("DEFENSE: " + DEFENSE);
 
         double DEF_SCORE = DEFENSE / 120;
 
@@ -223,7 +245,6 @@ public class NodePolygon extends GamePolygon {
                 default: break;
             }
         }
-        System.out.println("ATTACK: " + ATTACK);
 
         return ATTACK / 100;
     }
@@ -236,5 +257,4 @@ public class NodePolygon extends GamePolygon {
             default: return 1; // should never happen
         }
     }
-
 }

@@ -93,6 +93,10 @@ public class GroupActivity extends AppCompatActivity {
                 }
 
                 intent.putExtra("group", group);
+                if(group.getNameList().size() >= 4){
+                    Toast.makeText(GroupActivity.this, "Your group is the maximum size!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 startActivityForResult(intent, 1);
             }
         });
@@ -159,6 +163,8 @@ public class GroupActivity extends AppCompatActivity {
 
             alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+
+                    tv.setText(input.getText()); // TODO: Make linked to server, for now bypassed to always just change
 
                     Resources res = getResources();
                     String scheme = res.getString(R.string.login_server_protocol);

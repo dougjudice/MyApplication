@@ -381,10 +381,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             JSONArray placesJsonArray = new JSONArray(placesJson);
             for (int i=0; i<placesJson.length(); i++) {
+
+                /*
+                if(i % 2 == 0){
+                    continue;
+                }
+                */
                 JSONObject polyJsonObj = placesJsonArray.getJSONObject(i);
                 NodePolygon np = GeoJsonUtil.generatePolygon(polyJsonObj,mMap);
                 np.getPolygon().setClickable(true);
-                np.setResource(1000); // TODO: Get from server
+                np.setResource(10000); // TODO: Get from server
                 pairPolyMap.put(np.getPolygon(),np.getName());
                 pairNodeMap.put(np.getName(),np);
                 addCustomMarker(np);
@@ -424,8 +430,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(mMap == null)
             return;
 
+        String s = np.getResourceType();
+        switch(s){
+            case "Commonite": np.addMarkerInfo(1, R.drawable.commonite, mMap, this); return;
+            case "Rareium": np.addMarkerInfo(1, R.drawable.rarium, mMap, this); return;
+            case "Legendgem": np.addMarkerInfo(1, R.drawable.legendgem, mMap, this); return;
+            default: return;
+        }
 
-        np.addMarkerInfo(1, R.drawable.rarium, mMap, this);
+        //np.addMarkerInfo(1, R.drawable.rarium, mMap, this);
         /*
         Marker m = np.getMarker();
         m = mMap.addMarker(new MarkerOptions()
@@ -513,6 +526,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     locationSet = true;
                 }
 
+
+
                 // See if item is expired
                 Long time = System.currentTimeMillis();
                 SharedPreferences sp = getSharedPreferences("ItemPref", Context.MODE_PRIVATE);
@@ -527,7 +542,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //System.out.println("Checking system");
                 String state = Utility.checkAllIntersections(pairNodeMap, mLastLocation);
-                System.out.println("PULSING");
                 pulseMap();
                 counter++;
                 updateItem();
@@ -541,17 +555,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Animation animSlideDown = AnimationUtils.loadAnimation(getApplicationContext(),
                                 R.anim.slide_down);
 
+                        int t = overlap.getTake();
+
                         // Set toolTip to color, state
                         resourceToolTip.setBackgroundColor(ContextCompat.getColor(getApplicationContext(),R.color.rariumBlue));
                         resourceToolTip.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.black));
-                        resourceToolTip.setText("Currently Mining " + state); // TODO: Show mining rate here also
+                        resourceToolTip.setText("Mining " + state + " at rate: "+t); // TODO: Show mining rate here also
                         resourceToolTip.startAnimation(animSlideDown);
                         inNode = true;
                     }
                     overlap.depleteResourcesOnTick();
                 }
                 else { // User not in any polygon
-                    System.out.println("User not in any polygon");
 
                     // Set toolTip to transparent
                     if(inNode) {

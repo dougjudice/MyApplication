@@ -17,8 +17,8 @@
 
 
     <string name="login_server_protocol">http</string>
-    <!--string name="login_server_host">104.131.61.222</string--> <!--Production-->
-    <string name="login_server_host">10.0.2.2</string> <!--Local machine-->
+    <string name="login_server_host">104.131.61.222</string> <!--Production-->
+    <!--<string name="login_server_host">10.0.2.2</string--> <!--Local machine-->
     <string name="login_server_login_endpoint">api/login/id</string>
     <string name="login_server_token_parameter">token</string>
     <string name="login_server_connection_error">Problem authenticating with login server</string>
