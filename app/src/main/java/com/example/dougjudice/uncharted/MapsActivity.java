@@ -50,6 +50,7 @@ import com.example.dougjudice.uncharted.SettingsDrawerActivities.CraftingActivit
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.GroupActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.LeaderboardActivity;
 import com.example.dougjudice.uncharted.SettingsDrawerActivities.ResourceActivity;
+import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
@@ -79,12 +80,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 // My Imports
 // Maps imports
@@ -500,6 +511,48 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
+    private String serializeLocation(Location location) {
+        return String.format("{Latitude: %f, Longitude: %f}", location.getLatitude(), location.getLatitude());
+    }
+
+    private void sendLocationToServer(Location location) {
+
+        Resources res = getResources();
+        String scheme = res.getString(R.string.login_server_protocol);
+        String host = res.getString(R.string.login_server_host);
+        String endPoint = res.getString(R.string.server_location_endpoint);
+        String userId = Integer.toString(UserProfile.getProfile().getUserId());
+
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme(scheme)
+                .host(host)
+                .port(res.getInteger(R.integer.login_server_port))
+                .addPathSegments(endPoint)
+                .addPathSegments(userId)
+                .build();
+
+        String serializedLocation = serializeLocation(location);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), serializedLocation))
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    System.out.print("location sent to server");
+                }
+            }
+        });
+    }
+
     // Linked to PulseService, executes every 5 Seconds
     public void forceLocationUpdate(){
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
@@ -519,6 +572,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 System.out.println("EXCEPTION: NO USER LOCATION");
                 return;
             }
+
+            sendLocationToServer(mLastLocation);
+
             //locationSet = true;
             if(pairNodeMap != null) {
                 if(locationSet == false){
