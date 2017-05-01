@@ -3,16 +3,11 @@ package com.example.dougjudice.uncharted;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -30,8 +25,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -202,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 .scheme("http")
                 .host(res.getString(R.string.login_server_host))
                 .port(res.getInteger(R.integer.login_server_port))
-                .addPathSegment(res.getString(R.string.login_server_places_endpoint))
+                .addPathSegments(res.getString(R.string.active_places_shapes_endpoint))
                 .build();
 
         Request request = new Request.Builder().url(url).build();

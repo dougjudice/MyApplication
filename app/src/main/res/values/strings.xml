@@ -17,8 +17,8 @@
 
 
     <string name="login_server_protocol">http</string>
-    <string name="login_server_host">104.131.61.222</string>
-    <string name="login_server_places_endpoint">places.json</string>
+    <!--string name="login_server_host">104.131.61.222</string--> <!--Production-->
+    <string name="login_server_host">10.0.2.2</string> <!--Local machine-->
     <string name="login_server_login_endpoint">api/login/id</string>
     <string name="login_server_token_parameter">token</string>
     <string name="login_server_connection_error">Problem authenticating with login server</string>
@@ -36,8 +36,7 @@
     <string name="server_group_endpoint">api/groups</string>
     <string name="server_groups_members_segment">members</string>
     <string name="server_groups_name_segment">name</string>
-
-
-    <!-- crowdclashlogin.ddns.net -->
+    <string name="active_places_shapes_endpoint">api/world/active-places-data</string>
+    <string name="could_not_get_active_nodes">Could not get active nodes</string>
 
 </resources>
